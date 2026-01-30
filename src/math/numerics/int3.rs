@@ -8,23 +8,22 @@ pub struct Int3 {
 }
 
 impl Int3 {
-    pub const fn new(x: i32, y: i32, z: i32) -> Self {
-        Self { x, y, z }
+    pub const fn new(x: i32, y: i32, z: i32) -> Int3 {
+        Int3 { x, y, z }
     }
 }
 
 // ======= ADD ======= 
 impl Add for Int3 {
-    type Output = Self;
-    fn add(self, rhs: Self) -> Self {
-        Self { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
+    type Output = Int3;
+    fn add(self, rhs: Int3) -> Int3 {
+        Int3 { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
     }
 }
-
 impl Add<i32> for Int3 {
-    type Output = Self;
-    fn add(self, rhs: i32) -> Self {
-        Self { x: self.x + rhs, y: self.y + rhs, z: self.z + rhs }
+    type Output = Int3;
+    fn add(self, rhs: i32) -> Int3 {
+        Int3 { x: self.x + rhs, y: self.y + rhs, z: self.z + rhs }
     }
 }
 impl Add<Int3> for i32 {
@@ -35,7 +34,7 @@ impl Add<Int3> for i32 {
 }
 
 impl AddAssign for Int3 {
-    fn add_assign(&mut self, rhs: Self) {
+    fn add_assign(&mut self, rhs: Int3) {
         self.x += rhs.x; self.y += rhs.y; self.z += rhs.z;
     }
 }
@@ -47,16 +46,15 @@ impl AddAssign<i32> for Int3 {
 
 // ======= SUB ======= 
 impl Sub for Int3 {
-    type Output = Self;
-    fn sub(self, rhs: Self) -> Self {
-        Self { x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z }
+    type Output = Int3;
+    fn sub(self, rhs: Int3) -> Int3 {
+        Int3 { x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z }
     }
 }
-
 impl Sub<i32> for Int3 {
-    type Output = Self;
-    fn sub(self, rhs: i32) -> Self {
-        Self { x: self.x - rhs, y: self.y - rhs, z: self.z - rhs }
+    type Output = Int3;
+    fn sub(self, rhs: i32) -> Int3 {
+        Int3 { x: self.x - rhs, y: self.y - rhs, z: self.z - rhs }
     }
 }
 impl Sub<Int3> for i32 {
@@ -67,7 +65,7 @@ impl Sub<Int3> for i32 {
 }
 
 impl SubAssign for Int3 {
-    fn sub_assign(&mut self, rhs: Self) {
+    fn sub_assign(&mut self, rhs: Int3) {
         self.x -= rhs.x; self.y -= rhs.y; self.z -= rhs.z;
     }
 }
@@ -79,9 +77,9 @@ impl SubAssign<i32> for Int3 {
 
 // ======= MUL =======
 impl Mul<i32> for Int3 {
-    type Output = Self;
-    fn mul(self, rhs: i32) -> Self {
-        Self { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
+    type Output = Int3;
+    fn mul(self, rhs: i32) -> Int3 {
+        Int3 { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
     }
 }
 impl Mul<Int3> for i32 {
@@ -99,9 +97,9 @@ impl MulAssign<i32> for Int3 {
 
 // ======= DIV =======
 impl Div<i32> for Int3 {
-    type Output = Self;
-    fn div(self, rhs: i32) -> Self {
-        Self { x: self.x / rhs, y: self.y / rhs, z: self.z / rhs }
+    type Output = Int3;
+    fn div(self, rhs: i32) -> Int3 {
+        Int3 { x: self.x / rhs, y: self.y / rhs, z: self.z / rhs }
     }
 }
 

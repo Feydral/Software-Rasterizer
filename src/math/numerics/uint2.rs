@@ -7,23 +7,22 @@ pub struct UInt2 {
 }
 
 impl UInt2 {
-    pub const fn new(x: u32, y: u32) -> Self {
-        Self { x, y }
+    pub const fn new(x: u32, y: u32) -> UInt2 {
+        UInt2 { x, y }
     }
 }
 
 // ======= ADD ======= 
 impl Add for UInt2 {
-    type Output = Self;
-    fn add(self, rhs: Self) -> Self {
-        Self { x: self.x + rhs.x, y: self.y + rhs.y }
+    type Output = UInt2;
+    fn add(self, rhs: UInt2) -> UInt2 {
+        UInt2 { x: self.x + rhs.x, y: self.y + rhs.y }
     }
 }
-
 impl Add<u32> for UInt2 {
-    type Output = Self;
-    fn add(self, rhs: u32) -> Self {
-        Self { x: self.x + rhs, y: self.y + rhs }
+    type Output = UInt2;
+    fn add(self, rhs: u32) -> UInt2 {
+        UInt2 { x: self.x + rhs, y: self.y + rhs }
     }
 }
 impl Add<UInt2> for u32 {
@@ -34,7 +33,7 @@ impl Add<UInt2> for u32 {
 }
 
 impl AddAssign for UInt2 {
-    fn add_assign(&mut self, rhs: Self) {
+    fn add_assign(&mut self, rhs: UInt2) {
         self.x += rhs.x; self.y += rhs.y;
     }
 }
@@ -46,16 +45,15 @@ impl AddAssign<u32> for UInt2 {
 
 // ======= SUB ======= 
 impl Sub for UInt2 {
-    type Output = Self;
-    fn sub(self, rhs: Self) -> Self {
-        Self { x: self.x - rhs.x, y: self.y - rhs.y }
+    type Output = UInt2;
+    fn sub(self, rhs: UInt2) -> UInt2 {
+        UInt2 { x: self.x - rhs.x, y: self.y - rhs.y }
     }
 }
-
 impl Sub<u32> for UInt2 {
-    type Output = Self;
-    fn sub(self, rhs: u32) -> Self {
-        Self { x: self.x - rhs, y: self.y - rhs }
+    type Output = UInt2;
+    fn sub(self, rhs: u32) -> UInt2 {
+        UInt2 { x: self.x - rhs, y: self.y - rhs }
     }
 }
 impl Sub<UInt2> for u32 {
@@ -66,7 +64,7 @@ impl Sub<UInt2> for u32 {
 }
 
 impl SubAssign for UInt2 {
-    fn sub_assign(&mut self, rhs: Self) {
+    fn sub_assign(&mut self, rhs: UInt2) {
         self.x -= rhs.x; self.y -= rhs.y;
     }
 }
@@ -78,9 +76,9 @@ impl SubAssign<u32> for UInt2 {
 
 // ======= MUL =======
 impl Mul<u32> for UInt2 {
-    type Output = Self;
-    fn mul(self, rhs: u32) -> Self {
-        Self { x: self.x * rhs, y: self.y * rhs }
+    type Output = UInt2;
+    fn mul(self, rhs: u32) -> UInt2 {
+        UInt2 { x: self.x * rhs, y: self.y * rhs }
     }
 }
 impl Mul<UInt2> for u32 {
@@ -98,9 +96,9 @@ impl MulAssign<u32> for UInt2 {
 
 // ======= DIV =======
 impl Div<u32> for UInt2 {
-    type Output = Self;
-    fn div(self, rhs: u32) -> Self {
-        Self { x: self.x / rhs, y: self.y / rhs }
+    type Output = UInt2;
+    fn div(self, rhs: u32) -> UInt2 {
+        UInt2 { x: self.x / rhs, y: self.y / rhs }
     }
 }
 
