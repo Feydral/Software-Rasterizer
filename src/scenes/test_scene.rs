@@ -11,12 +11,16 @@ pub struct TestScene {
 impl TestScene {
     pub fn new() -> Self {
         Self {
-            vertices: vec![Float3::new(0.0, 0.0, 0.0), Float3::new(768.0, 768.0, 0.0), Float3::new(768.0, 0.0, 0.0)],
+            vertices: vec![Float3::new(-10.0, -10.0, 0.0), Float3::new(35.0, 50.0, 0.0), Float3::new(60.0, -10.0, 0.0)],
         }
     }
 }
 
 impl Scene for TestScene {
+    fn resize(&mut self, new_width: u32, new_height: u32, render_target: &mut RenderTarget) {
+        *render_target = RenderTarget::new(new_width, new_height);
+    }
+
     fn update(&mut self, delta_time: f32, render_target: &mut RenderTarget) {
         println!("{}", 1.0 / delta_time);
 
