@@ -5,7 +5,7 @@ pub fn point_in_triangle(a: Float2, b: Float2, c: Float2, p: Float2) -> bool {
     let side_ab = point_on_right_side_of_line(a, b, p);
     let side_bc = point_on_right_side_of_line(b, c, p);
     let side_ca = point_on_right_side_of_line(c, a, p);
-    side_ab == side_bc && side_bc == side_ca
+    side_ab == side_bc && side_bc == side_ca && side_ca == true
 }
 
 #[inline]

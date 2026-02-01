@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::math::numerics::uint2::UInt2;
 
 #[inline]

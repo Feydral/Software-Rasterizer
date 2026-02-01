@@ -32,10 +32,16 @@ impl RenderTarget {
         self.depth_buffer[index] = depth;
     }
 
-    pub fn get_pixel(&self, x: u32, y: u32) -> (Float3, f32) {
+    pub fn get_pixel_color(&self, x: u32, y: u32) -> Float3 {
         let index = mathi::xy_to_index(x, y, self.width, self.height) as usize;
-        (self.color_buffer[index], self.depth_buffer[index])
+        self.color_buffer[index]
     }
+    
+    pub fn get_pixel_depth(&self, x: u32, y: u32) -> f32 {
+        let index = mathi::xy_to_index(x, y, self.width, self.height) as usize;
+        self.depth_buffer[index]
+    }
+
 
     pub fn width(&self) -> u32 {
         self.width

@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::ops::*;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -26,9 +28,13 @@ impl Float3 {
     }
 
 
-    pub fn zero() -> Float3 {
-        Float3 { x: 0.0, y: 0.0, z: 0.0 }
-    }
+    pub const ZERO: Self = Self::new(0.0, 0.0, 0.0);
+    pub const ONE: Self  = Self::new(1.0, 1.0, 1.0);
+    pub const TWO: Self  = Self::new(2.0, 2.0, 2.0);
+    pub const HALF: Self = Self::new(0.5, 0.5, 0.5);
+    pub const UNIT_X: Self = Self::new(1.0, 0.0, 0.0);
+    pub const UNIT_Y: Self = Self::new(0.0, 1.0, 0.0);
+    pub const UNIT_Z: Self = Self::new(0.0, 0.0, 1.0);
 }
 
 // ======= ADD =======
