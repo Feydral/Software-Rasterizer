@@ -1,3 +1,5 @@
+use std::f32;
+
 use crate::math::numerics::float3::Float3;
 use crate::math::mathi;
 
@@ -22,7 +24,7 @@ impl RenderTarget {
 
     pub fn clear(&mut self) -> &mut Self {
         self.color_buffer.fill(Float3::new(0.0, 0.0, 0.0));
-        self.depth_buffer.fill(0.0);
+        self.depth_buffer.fill(f32::INFINITY);
         self
     }
 

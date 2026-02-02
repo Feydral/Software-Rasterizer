@@ -34,3 +34,8 @@ pub fn max(a: i32, b: i32) -> i32 {
 pub fn clamp(a: i32, min: i32, max: i32) -> i32 {
     a.clamp(min, max)
 }
+
+#[inline]
+pub fn bool_to_int(b: bool) -> i32 {
+    if b { 1 } else { 0 }
+}

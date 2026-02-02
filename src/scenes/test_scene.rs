@@ -1,8 +1,8 @@
 use minifb::Key;
 
-use crate::engine::input;
-use crate::math::numerics::float2::Float2;
+use crate::core::input;
 use crate::math::numerics::float3::Float3;
+use crate::rasterizer::camera::Camera;
 use crate::rasterizer::rasterizer;
 use crate::types::model::Model;
 use crate::types::{scene::Scene, mesh::Mesh};
@@ -10,6 +10,7 @@ use crate::rasterizer::render_target::RenderTarget;
 
 pub struct TestScene {
     models: Vec<Model>,
+    cam: Camera,
 
     speed: f32,
 }
@@ -18,7 +19,7 @@ impl TestScene {
     pub fn new() -> Self {
         Self {
             models: Vec::new(),
-
+            cam: Camera::new(60.0),
             speed: 5.0,
         }
     }
@@ -91,6 +92,34 @@ impl Scene for TestScene {
             Float3::new( 0.5, -0.5,  0.5),
             Float3::new(-0.5, -0.5,  0.5),
         ];
+
+        let floor = self.create_model("Floor");
+        
+        let size: f32 = 100.0;
+        let divisions: i32 = 200;
+        let half = size / 2.0;
+        let step = size / divisions as f32;
+
+        let mut vertices = Vec::with_capacity((divisions * divisions * 6) as usize);
+
+        for x in 0..divisions {
+            for z in 0..divisions {
+                let x0 = -half + x as f32 * step;
+                let x1 = x0 + step;
+                let z0 = -half + z as f32 * step;
+                let z1 = z0 + step;
+            
+                vertices.push(Float3::new(x0, -2.0, z0));
+                vertices.push(Float3::new(x1, -2.0, z1));
+                vertices.push(Float3::new(x1, -2.0, z0));
+
+                vertices.push(Float3::new(x0, -2.0, z0));
+                vertices.push(Float3::new(x0, -2.0, z1));
+                vertices.push(Float3::new(x1, -2.0, z1));
+            }
+        }
+
+        floor.mesh_mut().vertices = vertices;
     }
 
     fn update(&mut self, delta_time: f32, render_target: &mut RenderTarget) {
@@ -107,23 +136,23 @@ impl Scene for TestScene {
     
         let model = self.get_model("Model").unwrap();
 
-        model.tranform_mut().rotate(Float3::new( speed * 0.1, speed * 0.5, 0.0));
+        model.transform_mut().rotate(Float3::new( speed * 0.1, speed * 0.5, 0.0));
 
         if input::is_pressed(Key::W) {
-            model.tranform_mut().translate(Float3::new(0.0, 0.0, speed));
+            self.cam.transform.translate(Float3::new(0.0, 0.0, speed));
         }
         if input::is_pressed(Key::S) {
-            model.tranform_mut().translate(Float3::new(0.0, 0.0, -speed));
+            self.cam.transform.translate(Float3::new(0.0, 0.0, -speed));
         }
         if input::is_pressed(Key::D) {
-            model.tranform_mut().translate(Float3::new(speed, 0.0, 0.0));
+            self.cam.transform.translate(Float3::new(speed, 0.0, 0.0));
         }
         if input::is_pressed(Key::A) {
-            model.tranform_mut().translate(Float3::new(-speed, 0.0, 0.0));
+            self.cam.transform.translate(Float3::new(-speed, 0.0, 0.0));
         }
 
         render_target.clear();
-        rasterizer::render(render_target, &self.models);
+        rasterizer::render(render_target, &mut self.models, &self.cam);
     }
 
     fn resize(&mut self, new_width: u32, new_height: u32, render_target: &mut RenderTarget) {

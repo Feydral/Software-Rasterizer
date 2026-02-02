@@ -1,8 +1,8 @@
-use crate::engine::engine::Engine;
+use crate::core::engine::Engine;
 use crate::scenes::test_scene::TestScene;
 
 mod math;
-mod engine;
+mod core;
 mod scenes;
 mod rasterizer;
 mod types;

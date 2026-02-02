@@ -1,23 +1,34 @@
-use crate::math::numerics::float2::Float2;
+use crate::math::numerics::{float2::Float2, float3::Float3};
 
+// Test if point p is inside triangle ABC
+// Note: non-clockwise triangles are considered 'back-faces' and are ignored
 #[inline]
-pub fn point_in_triangle(a: Float2, b: Float2, c: Float2, p: Float2) -> bool {
-    let side_ab = point_on_right_side_of_line(a, b, p);
-    let side_bc = point_on_right_side_of_line(b, c, p);
-    let side_ca = point_on_right_side_of_line(c, a, p);
-    side_ab == side_bc && side_bc == side_ca && side_ca == true
+pub fn point_in_triangle(a: Float2, b: Float2, c: Float2, p: Float2, weight_a: &mut f32, weight_b: &mut f32, weight_c: &mut f32) -> bool {
+    // Test if point is on right side of each edge segment
+    let area_abp = signed_parallelogram_area(a, b, p);
+    let area_bcp = signed_parallelogram_area(b, c, p);
+    let area_cap = signed_parallelogram_area(c, a, p);
+    let in_tri = area_abp >= 0.0 && area_bcp >= 0.0 && area_cap >= 0.0;
+
+    // Weighting factors (barycentric coordinates)
+    let total_area = area_abp + area_bcp + area_cap;
+    let inv_area_sum = 1.0 / total_area;
+
+    *weight_a = area_bcp * inv_area_sum;
+    *weight_b = area_cap * inv_area_sum;
+    *weight_c = area_abp * inv_area_sum;
+
+    in_tri && total_area > 0.0
 }
 
 #[inline]
-fn point_on_right_side_of_line(a: Float2, b: Float2, p: Float2) -> bool {
-    let ap = p - a;
-    let ap_perpendicular = perpendicular(b - a);
-    ap.dot(ap_perpendicular) >= 0.0
+pub fn signed_parallelogram_area(a: Float2, b: Float2, c: Float2) -> f32 {
+    (c.x - a.x) * (b.y - a.y) + (c.y - a.y) * (a.x - b.x)
 }
 
 #[inline]
-fn perpendicular(vec: Float2) -> Float2 {
-    Float2::new(vec.y, -vec.x)
+pub fn round_to_int(value: f32) -> i32 {
+    value.round() as i32
 }
 
 #[inline]
@@ -43,4 +54,16 @@ pub fn ceil_to_int(a: f32) -> i32 {
 #[inline]
 pub fn floor_to_int(a: f32) -> i32 {
     a.floor() as i32
+}
+
+#[inline]
+pub fn lerp_float3(a: Float3, b: Float3, t: f32) -> Float3 {
+	t.clamp(0.0, 1.0);
+	a + (b - a) * t
+}
+
+#[inline]
+pub fn lerp_float2(a: Float2, b: Float2, t: f32) -> Float2 {
+	t.clamp(0.0, 1.0);
+	a + (b - a) * t
 }
