@@ -5,6 +5,7 @@ use crate::math::numerics::float3::Float3;
 use crate::rasterizer::camera::Camera;
 use crate::rasterizer::rasterizer;
 use crate::types::model::Model;
+use crate::types::rasterizer_model::RasterizerModel;
 use crate::types::{scene::Scene, mesh::Mesh};
 use crate::rasterizer::render_target::RenderTarget;
 
@@ -25,7 +26,7 @@ impl TestScene {
     }
 
     fn get_model(&mut self, name: &str) -> Option<&mut Model> {
-        self.models.iter_mut().find(|model| model.name() == name)
+        self.models.iter_mut().find(|model| model.name == name)
     }
 
     fn create_model(&mut self, name: &str) -> &mut Model {
@@ -37,7 +38,7 @@ impl TestScene {
 impl Scene for TestScene {
     fn start(&mut self, render_target: &mut RenderTarget) {
         let model = self.create_model("Model");
-        model.mesh_mut().vertices = vec![
+        model.mesh.vertices = vec![
             // Front (+Z)
             Float3::new(-0.5, -0.5,  0.5),
             Float3::new( 0.5, -0.5,  0.5),
@@ -119,24 +120,22 @@ impl Scene for TestScene {
             }
         }
 
-        floor.mesh_mut().vertices = vertices;
+        floor.mesh.vertices = vertices;
     }
 
     fn update(&mut self, delta_time: f32, render_target: &mut RenderTarget) {
         println!("Fps: {}", 1.0 / delta_time);
 
         if input::is_pressed(Key::R) {
-            self.speed += 0.1;
+            self.speed += 0.3;
         }
         else if input::is_pressed(Key::F) {
-            self.speed -= 0.1;
+            self.speed -= 0.3;
         }
 
         let speed = self.speed * delta_time;
     
-        let model = self.get_model("Model").unwrap();
-
-        model.transform_mut().rotate(Float3::new( speed * 0.1, speed * 0.5, 0.0));
+        self.get_model("Model").unwrap().transform.rotate(Float3::new( speed * 0.1, speed * 0.5, 0.0));
 
         if input::is_pressed(Key::W) {
             self.cam.transform.translate(Float3::new(0.0, 0.0, speed));
@@ -152,10 +151,15 @@ impl Scene for TestScene {
         }
 
         render_target.clear();
-        rasterizer::render(render_target, &mut self.models, &self.cam);
+
+        let mut r_models: Vec<RasterizerModel> = Vec::new();
+        for model in &self.models {
+            r_models.push(RasterizerModel::process_model(model, render_target, &self.cam));
+        }
+        rasterizer::render(render_target, &mut r_models, &self.cam);
     }
 
     fn resize(&mut self, new_width: u32, new_height: u32, render_target: &mut RenderTarget) {
-        *render_target = RenderTarget::new(new_width, new_height);
+        
     }
 }

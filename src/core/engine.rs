@@ -91,6 +91,7 @@ impl Engine {
 
     fn resize<T: Scene>(&mut self, scene: &mut T, render_target: &mut RenderTarget) {
         self.framebuffer = vec![0u32; (self.width * self.height) as usize];
+        *render_target = RenderTarget::new(self.width, self.height);
         scene.resize(self.width, self.height, render_target);
     }
 }
