@@ -97,7 +97,7 @@ impl Scene for TestScene {
         let floor = self.create_model("Floor");
         
         let size: f32 = 100.0;
-        let divisions: i32 = 200;
+        let divisions: i32 = 20;
         let half = size / 2.0;
         let step = size / divisions as f32;
 
@@ -151,12 +151,7 @@ impl Scene for TestScene {
         }
 
         render_target.clear();
-
-        let mut r_models: Vec<RasterizerModel> = Vec::new();
-        for model in &self.models {
-            r_models.push(RasterizerModel::process_model(model, render_target, &self.cam));
-        }
-        rasterizer::render(render_target, &mut r_models, &self.cam);
+        rasterizer::render(render_target, &mut self.models, &self.cam);
     }
 
     fn resize(&mut self, new_width: u32, new_height: u32, render_target: &mut RenderTarget) {

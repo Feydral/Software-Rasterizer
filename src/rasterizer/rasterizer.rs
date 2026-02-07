@@ -2,12 +2,13 @@ use crate::{math::numerics::{float2::Float2, float3::Float3}, rasterizer::{camer
 use crate::math::mathf as f;
 use crate::math::mathi as i;
 
-pub fn render(render_target: &mut RenderTarget, data: &mut Vec<RasterizerModel>, cam: &Camera) {
-    // for model in data.iter_mut() {
-    //     process_model(render_target, cam, model);
-    // }
+pub fn render(render_target: &mut RenderTarget, data: &mut Vec<Model>, cam: &Camera) {
+    let mut models: Vec<RasterizerModel> = Vec::new();
+    for model_raw in data {
+        models.push(RasterizerModel::process_model(model_raw, render_target, cam));
+    }
 
-    for model in data {
+    for model in models {
         for i in (0..model.points.len()).step_by(3) {
             let r0 = &model.points[i + 0];
             let r1 = &model.points[i + 1];
