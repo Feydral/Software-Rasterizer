@@ -29,14 +29,17 @@ pub fn update(window: &minifb::Window) {
     input.keys_up   = &input.prev_pressed - &input.keys_pressed;
 }
 
+#[allow(dead_code)]
 pub fn is_pressed(key: Key) -> bool {
     INPUT.lock().unwrap().keys_pressed.contains(&key)
 }
 
+#[allow(dead_code)]
 pub fn is_down(key: Key) -> bool {
     INPUT.lock().unwrap().keys_down.contains(&key)
 }
 
+#[allow(dead_code)]
 pub fn is_up(key: Key) -> bool {
     INPUT.lock().unwrap().keys_up.contains(&key)
 }

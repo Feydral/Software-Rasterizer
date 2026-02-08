@@ -1,4 +1,4 @@
-use crate::types::{mesh::Mesh, rasterizer_point::RasterizerPoint, transform::Transform};
+use crate::types::{mesh::Mesh, transform::Transform};
 
 pub struct Model {
     pub name: String,

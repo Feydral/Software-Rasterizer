@@ -1,13 +1,15 @@
+#![allow(unused_variables)]
+
 use minifb::Key;
 
 use crate::core::input;
 use crate::math::numerics::float3::Float3;
 use crate::rasterizer::camera::Camera;
 use crate::rasterizer::rasterizer;
+use crate::types::mesh::Mesh;
 use crate::types::model::Model;
-use crate::types::rasterizer_model::RasterizerModel;
-use crate::types::{scene::Scene, mesh::Mesh};
 use crate::rasterizer::render_target::RenderTarget;
+use crate::types::traits::scene::Scene;
 
 pub struct TestScene {
     models: Vec<Model>,
@@ -20,7 +22,7 @@ impl TestScene {
     pub fn new() -> Self {
         Self {
             models: Vec::new(),
-            cam: Camera::new(60.0),
+            cam: Camera::new(100.0),
             speed: 5.0,
         }
     }
@@ -37,61 +39,32 @@ impl TestScene {
 
 impl Scene for TestScene {
     fn start(&mut self, render_target: &mut RenderTarget) {
-        let model = self.create_model("Model");
+        let model = self.create_model("Model");// 8 Würfelecken
         model.mesh.vertices = vec![
+            Float3::new(-0.5, -0.5,  0.5), // 0: vorne unten links
+            Float3::new( 0.5, -0.5,  0.5), // 1: vorne unten rechts
+            Float3::new( 0.5,  0.5,  0.5), // 2: vorne oben rechts
+            Float3::new(-0.5,  0.5,  0.5), // 3: vorne oben links
+            Float3::new(-0.5, -0.5, -0.5), // 4: hinten unten links
+            Float3::new( 0.5, -0.5, -0.5), // 5: hinten unten rechts
+            Float3::new( 0.5,  0.5, -0.5), // 6: hinten oben rechts
+            Float3::new(-0.5,  0.5, -0.5), // 7: hinten oben links
+        ];
+
+        // Indices für 12 Dreiecke (2 pro Seite)
+        model.mesh.indices = vec![
             // Front (+Z)
-            Float3::new(-0.5, -0.5,  0.5),
-            Float3::new( 0.5, -0.5,  0.5),
-            Float3::new( 0.5,  0.5,  0.5),
-
-            Float3::new(-0.5, -0.5,  0.5),
-            Float3::new( 0.5,  0.5,  0.5),
-            Float3::new(-0.5,  0.5,  0.5),
-
+            0, 1, 2,  0, 2, 3,
             // Back (-Z)
-            Float3::new( 0.5, -0.5, -0.5),
-            Float3::new(-0.5, -0.5, -0.5),
-            Float3::new(-0.5,  0.5, -0.5),
-
-            Float3::new( 0.5, -0.5, -0.5),
-            Float3::new(-0.5,  0.5, -0.5),
-            Float3::new( 0.5,  0.5, -0.5),
-
+            5, 4, 7,  5, 7, 6,
             // Left (-X)
-            Float3::new(-0.5, -0.5, -0.5),
-            Float3::new(-0.5, -0.5,  0.5),
-            Float3::new(-0.5,  0.5,  0.5),
-
-            Float3::new(-0.5, -0.5, -0.5),
-            Float3::new(-0.5,  0.5,  0.5),
-            Float3::new(-0.5,  0.5, -0.5),
-
+            4, 0, 3,  4, 3, 7,
             // Right (+X)
-            Float3::new( 0.5, -0.5,  0.5),
-            Float3::new( 0.5, -0.5, -0.5),
-            Float3::new( 0.5,  0.5, -0.5),
-
-            Float3::new( 0.5, -0.5,  0.5),
-            Float3::new( 0.5,  0.5, -0.5),
-            Float3::new( 0.5,  0.5,  0.5),
-
+            1, 5, 6,  1, 6, 2,
             // Top (+Y)
-            Float3::new(-0.5,  0.5,  0.5),
-            Float3::new( 0.5,  0.5,  0.5),
-            Float3::new( 0.5,  0.5, -0.5),
-
-            Float3::new(-0.5,  0.5,  0.5),
-            Float3::new( 0.5,  0.5, -0.5),
-            Float3::new(-0.5,  0.5, -0.5),
-
+            3, 2, 6,  3, 6, 7,
             // Bottom (-Y)
-            Float3::new(-0.5, -0.5, -0.5),
-            Float3::new( 0.5, -0.5, -0.5),
-            Float3::new( 0.5, -0.5,  0.5),
-
-            Float3::new(-0.5, -0.5, -0.5),
-            Float3::new( 0.5, -0.5,  0.5),
-            Float3::new(-0.5, -0.5,  0.5),
+            4, 5, 1,  4, 1, 0,
         ];
 
         let floor = self.create_model("Floor");
@@ -101,26 +74,42 @@ impl Scene for TestScene {
         let half = size / 2.0;
         let step = size / divisions as f32;
 
-        let mut vertices = Vec::with_capacity((divisions * divisions * 6) as usize);
+        let verts_per_row = divisions + 1;
 
-        for x in 0..divisions {
-            for z in 0..divisions {
-                let x0 = -half + x as f32 * step;
-                let x1 = x0 + step;
-                let z0 = -half + z as f32 * step;
-                let z1 = z0 + step;
+        let mut vertices = Vec::with_capacity((verts_per_row * verts_per_row) as usize);
+        let mut indices  = Vec::with_capacity((divisions * divisions * 6) as usize);
+
+        // Vertices
+        for z in 0..=divisions {
+            for x in 0..=divisions {
+                let px = -half + x as f32 * step;
+                let pz = -half + z as f32 * step;
+                vertices.push(Float3::new(px, -2.0, pz));
+            }
+        }
+
+        // Indices
+        for z in 0..divisions {
+            for x in 0..divisions {
+                let i0 =  z * verts_per_row + x;
+                let i1 =  i0 + 1;
+                let i2 = (z + 1) * verts_per_row + x;
+                let i3 =  i2 + 1;
             
-                vertices.push(Float3::new(x0, -2.0, z0));
-                vertices.push(Float3::new(x1, -2.0, z1));
-                vertices.push(Float3::new(x1, -2.0, z0));
-
-                vertices.push(Float3::new(x0, -2.0, z0));
-                vertices.push(Float3::new(x0, -2.0, z1));
-                vertices.push(Float3::new(x1, -2.0, z1));
+                // Triangle 1
+                indices.push(i0 as u32);
+                indices.push(i3 as u32);
+                indices.push(i1 as u32);
+            
+                // Triangle 2
+                indices.push(i0 as u32);
+                indices.push(i2 as u32);
+                indices.push(i3 as u32);
             }
         }
 
         floor.mesh.vertices = vertices;
+        floor.mesh.indices  = indices;
     }
 
     fn update(&mut self, delta_time: f32, render_target: &mut RenderTarget) {

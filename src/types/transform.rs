@@ -36,31 +36,37 @@ impl Default for Transform {
 }
 
 impl Transform {
+    #[allow(dead_code)]
     pub fn set_position(&mut self, position: Float3) {
         self.set_pos_rot_scale(position, self.rotation, self.scale);
     }
 
+    #[allow(dead_code)]
     pub fn translate(&mut self, delta_postion: Float3) {
         self.set_pos_rot_scale(self.position + delta_postion, self.rotation, self.scale);
     }
 
+    #[allow(dead_code)]
     pub fn set_rotation(&mut self, rotation: Float3) {
         self.set_pos_rot_scale(self.position, rotation, self.scale);
     }
 
+    #[allow(dead_code)]
     pub fn rotate(&mut self, delta_rotation: Float3) {
         self.set_pos_rot_scale(self.position, self.rotation + delta_rotation, self.scale);
     }
 
+    #[allow(dead_code)]
     pub fn set_scale(&mut self, scale: Float3) {
         self.set_pos_rot_scale(self.position, self.rotation, scale);
     }
 
+    #[allow(dead_code)]
     pub fn scale(&mut self, delta_scale: Float3) {
         self.set_pos_rot_scale(self.position, self.rotation, self.scale + delta_scale);
     }
 
-    pub fn set_pos_rot_scale(&mut self, pos: Float3, rot: Float3, scale: Float3) {
+    fn set_pos_rot_scale(&mut self, pos: Float3, rot: Float3, scale: Float3) {
         self.position = pos;
         self.scale = scale;
         self.rotation = rot;

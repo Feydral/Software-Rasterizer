@@ -1,4 +1,4 @@
-use crate::{math::numerics::{float2::Float2, float3::Float3}, rasterizer::{camera::Camera, render_target::RenderTarget}, types::{model::Model, rasterizer_model::RasterizerModel, rasterizer_point::RasterizerPoint, transform::Transform}};
+use crate::{math::numerics::{float2::Float2, float3::Float3}, rasterizer::{camera::Camera, rasterizer_model::RasterizerModel, render_target::RenderTarget}, types::model::Model};
 use crate::math::mathf as f;
 use crate::math::mathi as i;
 
@@ -31,12 +31,12 @@ pub fn render(render_target: &mut RenderTarget, data: &mut Vec<Model>, cam: &Cam
             let block_end_y = i::clamp(f::ceil_to_int(max_y), 0, (render_target.height() - 1) as i32);
 
             let inv_depths = Float3::new(1.0 / r0.depth, 1.0 / r1.depth, 1.0 / r2.depth);
-            // let tx = r0.tex_coords * inv_depths.x;
-            // let ty = r1.tex_coords * inv_depths.y;
-            // let tz = r2.tex_coords * inv_depths.z;
-            // let nx = r0.normals * inv_depths.x;
-            // let ny = r1.normals * inv_depths.y;
-            // let nz = r2.normals * inv_depths.z;
+            let tx = r0.tex_coords * inv_depths.x;
+            let ty = r1.tex_coords * inv_depths.y;
+            let tz = r2.tex_coords * inv_depths.z;
+            let nx = r0.normals * inv_depths.x;
+            let ny = r1.normals * inv_depths.y;
+            let nz = r2.normals * inv_depths.z;
 
             // Loop over the block of pixels covering the triangle bounds
             for y in block_start_y..=block_end_y {
@@ -56,9 +56,9 @@ pub fn render(render_target: &mut RenderTarget, data: &mut Vec<Model>, cam: &Cam
                         }
 
                         // Interpolate texture coordinates at each vertex
-                        // let tex_coord = (tx * weight_a + ty * weight_b + tz * weight_c) * depth;
-                        // let normal = (nx * weight_a + ny * weight_b + nz * weight_c) * depth;
-                        // let col = model.shader.pixel_colour(p, tex_coord, normal, depth);
+                        let tex_coord = (tx * weight_a + ty * weight_b + tz * weight_c) * depth;
+                        let normal = (nx * weight_a + ny * weight_b + nz * weight_c) * depth;
+                        let col = model.shader.pixel_colour(p, tex_coord, normal, depth);
 
                         // let color = Float3::new(1.0 / (depth / 5.0), 1.0 / (depth / 5.0), 1.0 / (depth / 5.0));
                         // let color = Float3::new(1.0, 1.0, 1.0);

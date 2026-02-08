@@ -1,9 +1,9 @@
 use crate::math::numerics::float2::Float2;
 use crate::math::numerics::float3::Float3;
 use crate::rasterizer::camera::Camera;
+use crate::rasterizer::rasterizer_point::RasterizerPoint;
 use crate::rasterizer::render_target::RenderTarget;
 use crate::types::model::Model;
-use crate::types::rasterizer_point::RasterizerPoint;
 use crate::types::transform::Transform;
 use crate::math::mathf as f;
 use crate::math::mathi as i;
@@ -24,10 +24,14 @@ impl RasterizerModel {
         let mut view_points: [Float3; 3] = [Float3::ZERO, Float3::ZERO, Float3::ZERO];
         let mut r_model = Self::new();
 
-        for i in (0..model.mesh.vertices.len()).step_by(3) {
-        view_points[0] = Self::vertex_to_view(cam, model.mesh.vertices[i + 0], &model.transform);
-        view_points[1] = Self::vertex_to_view(cam, model.mesh.vertices[i + 1], &model.transform);
-        view_points[2] = Self::vertex_to_view(cam, model.mesh.vertices[i + 2], &model.transform);
+        for i in (0..model.mesh.indices.len()).step_by(3) {
+        let idx0 = model.mesh.indices[i + 0] as usize;
+        let idx1 = model.mesh.indices[i + 1] as usize;
+        let idx2 = model.mesh.indices[i + 2] as usize;
+
+        view_points[0] = Self::vertex_to_view(cam, model.mesh.vertices[idx0], &model.transform);
+        view_points[1] = Self::vertex_to_view(cam, model.mesh.vertices[idx1], &model.transform);
+        view_points[2] = Self::vertex_to_view(cam, model.mesh.vertices[idx2], &model.transform);
 
         // Dividing by depths too close to zero causes numerical issues,
         // so use some small positive value for the depth clip threshold
@@ -39,9 +43,9 @@ impl RasterizerModel {
 
         match clip_count {
             0 => {
-                Self::add_rasterizer_point(&mut r_model.points, render_target, cam, view_points[0], i + 0);
-                Self::add_rasterizer_point(&mut r_model.points, render_target, cam, view_points[1], i + 1);
-                Self::add_rasterizer_point(&mut r_model.points, render_target, cam, view_points[2], i + 2);
+                Self::add_rasterizer_point(&mut r_model.points, render_target, cam, view_points[0], idx0);
+                Self::add_rasterizer_point(&mut r_model.points, render_target, cam, view_points[1], idx1);
+                Self::add_rasterizer_point(&mut r_model.points, render_target, cam, view_points[2], idx2);
             }
             1 => {
                 // Figure out which point is to be clipped, and the two that will remain

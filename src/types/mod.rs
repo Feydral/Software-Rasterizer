@@ -1,7 +1,5 @@
-pub mod scene;
 pub mod texture;
 pub mod transform;
 pub mod mesh;
 pub mod model;
-pub mod rasterizer_point;
-pub mod rasterizer_model;
+pub mod traits;
