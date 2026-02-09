@@ -1,6 +1,6 @@
 use std::ops::*;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub struct Int2 {
     pub x: i32,
     pub y: i32,

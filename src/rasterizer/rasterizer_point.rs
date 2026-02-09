@@ -8,12 +8,12 @@ pub struct RasterizerPoint {
 }
 
 impl RasterizerPoint {
-    pub fn new(depth: f32, screen_pos: Float2) -> Self {
+    pub fn new(depth: f32, screen_pos: Float2, tex_coords: Float2, normals: Float3) -> Self {
         Self {
             depth,
             screen_pos,
-            tex_coords: Float2::ZERO,
-            normals: Float3::ZERO,
+            tex_coords,
+            normals,
         }
     }
 }

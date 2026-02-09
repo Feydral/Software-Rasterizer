@@ -2,7 +2,7 @@
 
 use std::ops::*;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub struct Float4 {
     pub x: f32,
     pub y: f32,

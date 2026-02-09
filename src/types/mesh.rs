@@ -11,7 +11,16 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn new() -> Self {
+    pub fn new(vertices: Vec<Float3>, indices: Vec<u32>, normals: Vec<Float3>, uvs: Vec<Float2>) -> Self {
+        Self {
+            vertices,
+            indices,
+            normals,
+            uvs,
+        }
+    }
+
+    pub fn empty() -> Self {
         Self {
             vertices: Vec::new(),
             indices: Vec::new(),

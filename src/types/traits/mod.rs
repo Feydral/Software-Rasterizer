@@ -1,2 +1,2 @@
 pub mod scene;
-pub mod shader;
+pub mod fragment_shader;

@@ -2,9 +2,10 @@ use std::f32;
 
 use crate::math::numerics::float3::Float3;
 use crate::math::mathi;
+use crate::math::numerics::float4::Float4;
 
 pub struct RenderTarget {
-    color_buffer: Vec<Float3>,
+    color_buffer: Vec<Float4>,
     depth_buffer: Vec<f32>,
 
     width: u32,
@@ -14,8 +15,8 @@ pub struct RenderTarget {
 impl RenderTarget {
     pub fn new(width: u32, height: u32) -> Self {
         Self {
-            color_buffer: vec![Float3::new(0.0, 0.0, 0.0); (width * height) as usize],
-            depth_buffer: vec![0.0; (width * height) as usize],
+            color_buffer: vec![Float4::ZERO; (width * height) as usize],
+            depth_buffer: vec![f32::INFINITY; (width * height) as usize],
 
             width,
             height,
@@ -23,18 +24,18 @@ impl RenderTarget {
     }
 
     pub fn clear(&mut self) -> &mut Self {
-        self.color_buffer.fill(Float3::new(0.0, 0.0, 0.0));
+        self.color_buffer.fill(Float4::ZERO);
         self.depth_buffer.fill(f32::INFINITY);
         self
     }
 
-    pub fn set_pixel(&mut self, x: u32, y: u32, color: Float3, depth: f32) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, color: Float4, depth: f32) {
         let index = mathi::xy_to_index(x, y, self.width, self.height) as usize;
         self.color_buffer[index] = color;
         self.depth_buffer[index] = depth;
     }
 
-    pub fn get_pixel_color(&self, x: u32, y: u32) -> Float3 {
+    pub fn get_pixel_color(&self, x: u32, y: u32) -> Float4 {
         let index = mathi::xy_to_index(x, y, self.width, self.height) as usize;
         self.color_buffer[index]
     }

@@ -1,18 +1,17 @@
-use crate::{math::numerics::{float2::Float2, float3::Float3}, rasterizer::{camera::Camera, rasterizer_model::RasterizerModel, render_target::RenderTarget}, types::model::Model};
+use crate::{math::numerics::{float2::Float2, float3::Float3}, rasterizer::{camera::Camera, rasterizer_point::RasterizerPoint, render_target::RenderTarget}, types::{model::Model, transform::Transform}};
 use crate::math::mathf as f;
 use crate::math::mathi as i;
 
-pub fn render(render_target: &mut RenderTarget, data: &mut Vec<Model>, cam: &Camera) {
-    let mut models: Vec<RasterizerModel> = Vec::new();
-    for model_raw in data {
-        models.push(RasterizerModel::process_model(model_raw, render_target, cam));
+pub fn render(render_target: &mut RenderTarget, models: &mut Vec<Model>, cam: &Camera) {
+    for model in models.iter_mut() {
+        process_model(model, render_target, cam);
     }
 
-    for model in models {
-        for i in (0..model.points.len()).step_by(3) {
-            let r0 = &model.points[i + 0];
-            let r1 = &model.points[i + 1];
-            let r2 = &model.points[i + 2];
+    for model in models.iter_mut() {
+        for i in (0..model.rasterizer_points.len()).step_by(3) {
+            let r0 = &model.rasterizer_points[i + 0];
+            let r1 = &model.rasterizer_points[i + 1];
+            let r2 = &model.rasterizer_points[i + 2];
 
             let a = r0.screen_pos;
             let b = r1.screen_pos;
@@ -47,22 +46,16 @@ pub fn render(render_target: &mut RenderTarget, data: &mut Vec<Model>, cam: &Cam
                     let mut weight_c = 0.0;
 
                     if f::point_in_triangle(a, b, c, p, &mut weight_a, &mut weight_b, &mut weight_c) {
-                        // Interpolate depths at each vertex to get value for current pixel
-                        let depth = 1.0 / (inv_depths.x * weight_a + inv_depths.y * weight_b + inv_depths.z * weight_c);
+                        let depth =
+                            1.0 / (inv_depths.x * weight_a + inv_depths.y * weight_b + inv_depths.z * weight_c);
 
-                        // Depth test (skip if something nearer has already been drawn)
                         if depth >= render_target.get_pixel_depth(x as u32, y as u32) {
                             continue;
                         }
 
-                        // Interpolate texture coordinates at each vertex
-                        let tex_coord = (tx * weight_a + ty * weight_b + tz * weight_c) * depth;
+                        let uv = (tx * weight_a + ty * weight_b + tz * weight_c) * depth;
                         let normal = (nx * weight_a + ny * weight_b + nz * weight_c) * depth;
-                        let col = model.shader.pixel_colour(p, tex_coord, normal, depth);
-
-                        // let color = Float3::new(1.0 / (depth / 5.0), 1.0 / (depth / 5.0), 1.0 / (depth / 5.0));
-                        // let color = Float3::new(1.0, 1.0, 1.0);
-                        let color = Float3::new(hash((i + 0) as f32), hash((i + 1) as f32), hash((i + 2) as f32));
+                        let color = model.shader.pixel_color(p, uv, normal, depth);
 
                         render_target.set_pixel(x as u32, y as u32, color, depth);
                     }
@@ -72,12 +65,115 @@ pub fn render(render_target: &mut RenderTarget, data: &mut Vec<Model>, cam: &Cam
     }
 }
 
-fn hash(x: f32) -> f32 {
-    let mut v = x.to_bits();
-    v ^= v >> 16;
-    v = v.wrapping_mul(0x7feb_352d);
-    v ^= v >> 15;
-    v = v.wrapping_mul(0x846c_a68b);
-    v ^= v >> 16;
-    (v as f32) / (u32::MAX as f32)
+pub fn process_model(model: &mut Model, render_target: &RenderTarget, cam: &Camera) {
+    let mut view_points: [Float3; 3] = [Float3::ZERO, Float3::ZERO, Float3::ZERO];
+    model.rasterizer_points.clear();
+
+    for i in (0..model.mesh.indices.len()).step_by(3) {
+        let idx0 = model.mesh.indices[i + 0] as usize;
+        let idx1 = model.mesh.indices[i + 1] as usize;
+        let idx2 = model.mesh.indices[i + 2] as usize;
+
+        view_points[0] = vertex_to_view(cam, model.mesh.vertices[idx0], &model.transform);
+        view_points[1] = vertex_to_view(cam, model.mesh.vertices[idx1], &model.transform);
+        view_points[2] = vertex_to_view(cam, model.mesh.vertices[idx2], &model.transform);
+
+        const NEAR_CLIP_DST: f32 = 0.01;
+        let clip0 = view_points[0].z <= NEAR_CLIP_DST;
+        let clip1 = view_points[1].z <= NEAR_CLIP_DST;
+        let clip2 = view_points[2].z <= NEAR_CLIP_DST;
+        let clip_count = i::bool_to_int(clip0) + i::bool_to_int(clip1) + i::bool_to_int(clip2);
+
+        match clip_count {
+            0 => {
+                add_rasterizer_point(model, render_target, cam, view_points[0], idx0);
+                add_rasterizer_point(model, render_target, cam, view_points[1], idx1);
+                add_rasterizer_point(model, render_target, cam, view_points[2], idx2);
+            }
+            1 => {
+                let index_clip = if clip0 { 0 } else if clip1 { 1 } else { 2 };
+                let index_next = (index_clip + 1) % 3;
+                let index_prev = (index_clip + 2) % 3;
+
+                let point_clipped = view_points[index_clip];
+                let point_a = view_points[index_next];
+                let point_b = view_points[index_prev];
+
+                let frac_a = (NEAR_CLIP_DST - point_clipped.z) / (point_a.z - point_clipped.z);
+                let frac_b = (NEAR_CLIP_DST - point_clipped.z) / (point_b.z - point_clipped.z);
+
+                let clip_point_a = f::lerp_float3(point_clipped, point_a, frac_a);
+                let clip_point_b = f::lerp_float3(point_clipped, point_b, frac_b);
+
+                let idx_clip = model.mesh.indices[i + index_clip] as usize;
+                let idx_next = model.mesh.indices[i + index_next] as usize;
+                let idx_prev = model.mesh.indices[i + index_prev] as usize;
+
+                add_rasterizer_point_lerp(model, render_target, cam, clip_point_b, idx_clip, idx_prev, frac_b);
+                add_rasterizer_point_lerp(model, render_target, cam, clip_point_a, idx_clip, idx_next, frac_a);
+                add_rasterizer_point(model, render_target, cam, point_b, idx_prev);
+
+                add_rasterizer_point_lerp(model, render_target, cam, clip_point_a, idx_clip, idx_next, frac_a);
+                add_rasterizer_point(model, render_target, cam, point_a, idx_next);
+                add_rasterizer_point(model, render_target, cam, point_b, idx_prev);
+            }
+            2 => {
+                let index_non_clip = if !clip0 { 0 } else if !clip1 { 1 } else { 2 };
+                let index_next = (index_non_clip + 1) % 3;
+                let index_prev = (index_non_clip + 2) % 3;
+
+                let point_nc = view_points[index_non_clip];
+                let point_a = view_points[index_next];
+                let point_b = view_points[index_prev];
+
+                let frac_a = (NEAR_CLIP_DST - point_nc.z) / (point_a.z - point_nc.z);
+                let frac_b = (NEAR_CLIP_DST - point_nc.z) / (point_b.z - point_nc.z);
+
+                let clip_point_a = f::lerp_float3(point_nc, point_a, frac_a);
+                let clip_point_b = f::lerp_float3(point_nc, point_b, frac_b);
+
+                let idx_nc = model.mesh.indices[i + index_non_clip] as usize;
+                let idx_next = model.mesh.indices[i + index_next] as usize;
+                let idx_prev = model.mesh.indices[i + index_prev] as usize;
+
+                add_rasterizer_point_lerp(model, render_target, cam, clip_point_b, idx_nc, idx_prev, frac_b);
+                add_rasterizer_point(model, render_target, cam, point_nc, idx_nc);
+                add_rasterizer_point_lerp(model, render_target, cam, clip_point_a, idx_nc, idx_next, frac_a);
+            }
+            _ => {}
+        }
+    }
+}
+
+fn add_rasterizer_point(model: &mut Model, render_target: &RenderTarget, cam: &Camera, view: Float3, vertex_idx: usize) {
+    model.rasterizer_points.push(RasterizerPoint::new(
+        view.z,
+        view_to_screen(render_target, cam, view),
+        model.mesh.uvs[vertex_idx],
+        model.mesh.normals[vertex_idx],
+    ));
+}
+
+fn add_rasterizer_point_lerp(model: &mut Model, render_target: &RenderTarget, cam: &Camera, view: Float3, vertex_idx_a: usize, vertex_idx_b: usize, t: f32) {
+    model.rasterizer_points.push(RasterizerPoint::new(
+        view.z,
+        view_to_screen(render_target, cam, view),
+        f::lerp_float2(model.mesh.uvs[vertex_idx_a], model.mesh.uvs[vertex_idx_b], t),
+        f::lerp_float3(model.mesh.normals[vertex_idx_a], model.mesh.normals[vertex_idx_b], t),
+    ));
+}
+
+#[inline(always)]
+fn vertex_to_view(cam: &Camera, vertex: Float3, transform: &Transform) -> Float3 {
+    let vertex_world = transform.to_world_point(vertex);
+    cam.transform.to_local_point(vertex_world)
+}
+
+#[inline(always)]
+fn view_to_screen(render_target: &RenderTarget, cam: &Camera, view: Float3) -> Float2 {
+    let screen_height_world = (cam.fov_degrees.to_radians() / 2.0).tan() * 2.0;
+    let pixels_per_world_unit = render_target.height() as f32 / screen_height_world / view.z;
+
+    let pixel_offset = Float2::new(view.x, view.y) * pixels_per_world_unit;
+    Float2::new(render_target.width() as f32, render_target.height() as f32) / 2.0 + pixel_offset
 }

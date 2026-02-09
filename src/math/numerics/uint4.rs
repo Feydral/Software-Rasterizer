@@ -1,6 +1,6 @@
 use std::ops::*;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub struct UInt4 {
     pub x: u32,
     pub y: u32,

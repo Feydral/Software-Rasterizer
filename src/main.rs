@@ -4,6 +4,7 @@ use crate::scenes::test_scene::TestScene;
 mod math;
 mod core;
 mod scenes;
+mod shaders;
 mod rasterizer;
 mod types;
 
