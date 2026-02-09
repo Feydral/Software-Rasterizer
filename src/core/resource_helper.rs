@@ -92,13 +92,17 @@ fn load_texture_png<P: AsRef<Path>>(path: P) -> Texture {
     let rgba = img.to_rgba8();
     let (width, height) = rgba.dimensions();
 
-    let mut image_data = vec![vec![Float4::ZERO; height as usize]; width as usize];
+    // y first, then x
+    let mut image_data = vec![vec![Float4::ZERO; width as usize]; height as usize];
 
     for y in 0..height {
         for x in 0..width {
             let [r, g, b, a] = rgba.get_pixel(x, y).0;
 
-            image_data[x as usize][y as usize] = Float4 {
+            // Flip y to match typical texture coordinate convention
+            let flipped_y = height - 1 - y;
+
+            image_data[flipped_y as usize][x as usize] = Float4 {
                 x: r as f32 / 255.0,
                 y: g as f32 / 255.0,
                 z: b as f32 / 255.0,

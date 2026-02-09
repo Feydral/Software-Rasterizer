@@ -12,6 +12,7 @@ impl TextureShader {
 }
 
 impl FragmentShader for TextureShader {
+    #[inline(always)]
     fn pixel_color(&self, pixel_coord: Float2, uv: Float2, normal: Float3, depth: f32) -> Float4 {
         let u_frac = uv.x - uv.x.floor();
         let v_frac = uv.y - uv.y.floor();
