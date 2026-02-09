@@ -7,7 +7,6 @@ use crate::math::numerics::float3::Float3;
 use crate::rasterizer::camera::Camera;
 use crate::rasterizer::rasterizer;
 use crate::shaders::lit_texture_shader::LitTextureShader;
-use crate::shaders::texture_shader::TextureShader;
 use crate::types::mesh::Mesh;
 use crate::types::model::Model;
 use crate::rasterizer::render_target::RenderTarget;
