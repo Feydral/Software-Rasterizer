@@ -6,6 +6,7 @@ use crate::core::{input, resource_helper};
 use crate::math::numerics::float3::Float3;
 use crate::rasterizer::camera::Camera;
 use crate::rasterizer::rasterizer;
+use crate::shaders::lit_texture_shader::LitTextureShader;
 use crate::shaders::texture_shader::TextureShader;
 use crate::types::mesh::Mesh;
 use crate::types::model::Model;
@@ -40,11 +41,13 @@ impl TestScene {
 
 impl Scene for TestScene {
     fn start(&mut self, render_target: &mut RenderTarget) {
-        let dirtblock_texture = resource_helper::load_texture("C:/Users/lianh/Development/rasterizer/src/assets/Dirtblock.png");
-        let cube_mesh = resource_helper::load_mesh("C:/Users/lianh/Development/rasterizer/src/assets/Cube.obj");
+        let color = resource_helper::load_texture("C:/Users/lianh/Development/rasterizer/src/assets/color.png");
+        let mesh = resource_helper::load_mesh("C:/Users/lianh/Development/rasterizer/src/assets/dragon.obj");
 
-        self.create_model("Cube", Box::new(TextureShader::new(dirtblock_texture)));
-        self.get_model("Cube").unwrap().mesh = cube_mesh;
+        self.create_model("Dragon", Box::new(LitTextureShader::new(Float3::UNIT_Y, color)));
+        let model = self.get_model("Dragon").unwrap();
+        model.mesh = mesh;
+        model.transform.set_position(Float3::new(0.0, -1.5, 0.0));
     }
 
     fn update(&mut self, delta_time: f32, render_target: &mut RenderTarget) {
@@ -59,7 +62,7 @@ impl Scene for TestScene {
 
         let speed = self.speed * delta_time;
     
-        self.get_model("Cube").unwrap().transform.rotate(Float3::new( speed * 0.1, speed * 0.5, 0.0));
+        self.get_model("Dragon").unwrap().transform.rotate(Float3::new( 0.0, speed * 0.3, 0.0));
 
         if input::is_pressed(Key::W) {
             self.cam.transform.translate(Float3::new(0.0, 0.0, speed));
