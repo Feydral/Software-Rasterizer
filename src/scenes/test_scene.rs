@@ -4,14 +4,15 @@ use minifb::Key;
 
 use crate::core::{input, resource_helper};
 use crate::math::numerics::float3::Float3;
+use crate::math::numerics::float4::Float4;
 use crate::rasterizer::camera::Camera;
 use crate::rasterizer::rasterizer;
 use crate::shaders::lit_texture_shader::LitTextureShader;
+use crate::shaders::traits::fragment_shader::FragmentShader;
 use crate::types::mesh::Mesh;
 use crate::types::model::Model;
 use crate::rasterizer::render_target::RenderTarget;
-use crate::types::traits::fragment_shader::FragmentShader;
-use crate::types::traits::scene::Scene;
+use crate::types::scene::Scene;
 
 pub struct TestScene {
     models: Vec<Model>,
@@ -25,6 +26,7 @@ impl TestScene {
         Self {
             models: Vec::new(),
             cam: Camera::new(100.0),
+
             speed: 5.0,
         }
     }
@@ -76,7 +78,7 @@ impl Scene for TestScene {
             self.cam.transform.translate(Float3::new(-speed, 0.0, 0.0));
         }
 
-        render_target.clear();
+        render_target.clear(Float4::new(0.53, 0.81, 0.92, 1.0));
         rasterizer::render(render_target, &mut self.models, &self.cam);
     }
 

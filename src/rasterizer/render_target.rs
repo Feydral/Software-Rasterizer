@@ -22,8 +22,8 @@ impl RenderTarget {
         }
     }
 
-    pub fn clear(&mut self) -> &mut Self {
-        self.color_buffer.fill(Float4::ZERO);
+    pub fn clear(&mut self, color: Float4) -> &mut Self {
+        self.color_buffer.fill(color);
         self.depth_buffer.fill(f32::INFINITY);
         self
     }

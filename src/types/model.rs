@@ -1,4 +1,4 @@
-use crate::{rasterizer::rasterizer_point::RasterizerPoint, types::{mesh::Mesh, traits::fragment_shader::FragmentShader, transform::Transform}};
+use crate::{rasterizer::rasterizer_point::RasterizerPoint, shaders::traits::fragment_shader::FragmentShader, types::{mesh::Mesh, transform::Transform}};
 
 pub struct Model {
     pub name: String,
