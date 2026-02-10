@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::f32;
 
 use crate::math::mathi;

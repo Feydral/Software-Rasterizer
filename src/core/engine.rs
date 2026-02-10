@@ -2,7 +2,7 @@ use rayon::prelude::*;
 use std::time::Instant;
 use minifb::{Window, WindowOptions};
 
-use crate::{core::input, math::mathf, rasterizer::render_target::RenderTarget, types::scene::Scene};
+use crate::{core::input, rasterizer::render_target::RenderTarget, types::scene::Scene};
 
 pub struct Engine {
     width: u32,
