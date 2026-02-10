@@ -1,4 +1,4 @@
-use crate::math::numerics::float3::Float3;
+use crate::math::{mathf, numerics::float3::Float3};
 
 #[derive(Debug, Clone)]
 pub struct Transform {
@@ -74,8 +74,10 @@ impl Transform {
     }
     
     // ---------------- World / Local ----------------
+    #[inline(always)]
+    #[allow(dead_code)]
     pub fn to_world_point(&self, local: Float3) -> Float3 {
-        let mut p = Self::transform_vector(
+        let mut p = mathf::transform_vector(
             self.right * self.scale.x,
             self.up * self.scale.y,
             self.forward * self.scale.z,
@@ -87,7 +89,9 @@ impl Transform {
         }
         p
     }
-
+    
+    #[inline(always)]
+    #[allow(dead_code)]
     pub fn to_local_point(&self, world: Float3) -> Float3 {
         let mut p = if let Some(parent) = &self.parent {
             parent.to_local_point(world)
@@ -95,7 +99,7 @@ impl Transform {
             world
         };
 
-        p = Self::transform_vector(
+        p = mathf::transform_vector(
             self.right_inv,
             self.up_inv,
             self.forward_inv,
@@ -107,19 +111,72 @@ impl Transform {
         p.z /= self.scale.z;
         p
     }
+    
+    #[inline(always)]
+    #[allow(dead_code)]
+    pub fn to_local_vector(&self, world_vec: Float3) -> Float3 {
+        let mut v = if let Some(parent) = &self.parent {
+            parent.to_local_vector(world_vec)
+        } else {
+            world_vec
+        };
 
-    fn update_basis_vectors(&mut self) {
-        let (r, u, f) = self.get_basis_vectors();
-        self.right = r;
-        self.up = u;
-        self.forward = f;
-
-        let (r_inv, u_inv, f_inv) = self.get_inverse_basis_vectors();
-        self.right_inv = r_inv;
-        self.up_inv = u_inv;
-        self.forward_inv = f_inv;
+        v = mathf::transform_vector(self.right_inv, self.up_inv, self.forward_inv, v);
+        v.normalize()
     }
-
+    
+    #[inline(always)]
+    #[allow(dead_code)]
+    pub fn to_world_vector(&self, local_vec: Float3) -> Float3 {
+        let mut v = mathf::transform_vector(self.right, self.up, self.forward, local_vec);
+        if let Some(parent) = &self.parent {
+            v = parent.to_world_vector(v);
+        }
+        v.normalize()
+    }
+    
+    #[inline(always)]
+    #[allow(dead_code)]
+    fn update_basis_vectors(&mut self) {
+        let pitch = self.rotation.x;
+        let yaw = self.rotation.y;
+        let roll = self.rotation.z;
+        
+        // Forward aus Pitch/Yaw
+        let forward = Float3::new(
+            yaw.sin() * pitch.cos(),
+            pitch.sin(),
+            yaw.cos() * pitch.cos()
+        ).normalize();
+    
+        let world_up = Float3::new(0.0, 1.0, 0.0);
+        let mut right = forward.cross(world_up).normalize();
+        let mut up = right.cross(forward).normalize();
+    
+        // Roll um Forward-Achse anwenden
+        if roll != 0.0 {
+            let cos_r = roll.cos();
+            let sin_r = roll.sin();
+        
+            let new_right = right * cos_r + up * sin_r;
+            let new_up = Float3::ZERO - right * sin_r + up * cos_r;
+        
+            right = new_right;
+            up = new_up;
+        }
+    
+        self.forward = forward;
+        self.right = right;
+        self.up = up;
+    
+        // Inverse Basisvektoren für to_local_point / to_local_vector
+        self.right_inv = Float3::new(right.x, up.x, forward.x);
+        self.up_inv = Float3::new(right.y, up.y, forward.y);
+        self.forward_inv = Float3::new(right.z, up.z, forward.z);
+    }
+    
+    #[inline(always)]
+    #[allow(dead_code)]
     fn get_basis_vectors(&self) -> (Float3, Float3, Float3) {
         let pitch = self.rotation.x;
         let yaw = self.rotation.y;
@@ -141,18 +198,20 @@ impl Transform {
         let khat_roll = Float3::new(0.0, 0.0, 1.0);
 
         // Pitch + Yaw
-        let ihat_py = Self::transform_vector(ihat_yaw, jhat_yaw, khat_yaw, ihat_pitch);
-        let jhat_py = Self::transform_vector(ihat_yaw, jhat_yaw, khat_yaw, jhat_pitch);
-        let khat_py = Self::transform_vector(ihat_yaw, jhat_yaw, khat_yaw, khat_pitch);
+        let ihat_py = mathf::transform_vector(ihat_yaw, jhat_yaw, khat_yaw, ihat_pitch);
+        let jhat_py = mathf::transform_vector(ihat_yaw, jhat_yaw, khat_yaw, jhat_pitch);
+        let khat_py = mathf::transform_vector(ihat_yaw, jhat_yaw, khat_yaw, khat_pitch);
 
         // + Roll
-        let ihat = Self::transform_vector(ihat_py, jhat_py, khat_py, ihat_roll);
-        let jhat = Self::transform_vector(ihat_py, jhat_py, khat_py, jhat_roll);
-        let khat = Self::transform_vector(ihat_py, jhat_py, khat_py, khat_roll);
+        let ihat = mathf::transform_vector(ihat_py, jhat_py, khat_py, ihat_roll);
+        let jhat = mathf::transform_vector(ihat_py, jhat_py, khat_py, jhat_roll);
+        let khat = mathf::transform_vector(ihat_py, jhat_py, khat_py, khat_roll);
 
         (ihat, jhat, khat)
     }
-
+    
+    #[inline(always)]
+    #[allow(dead_code)]
     fn get_inverse_basis_vectors(&self) -> (Float3, Float3, Float3) {
         let (r, u, f) = self.get_basis_vectors();
         let r_inv = Float3::new(r.x, u.x, f.x);
@@ -162,7 +221,34 @@ impl Transform {
     }
 
     #[inline(always)]
-    fn transform_vector(ihat: Float3, jhat: Float3, khat: Float3, v: Float3) -> Float3 {
+    #[allow(dead_code)]
+    pub fn transform_vector_along_self(&self, v: Float3) -> Float3 {
+        let (ihat, jhat, khat) = self.get_basis_vectors();
         ihat * v.x + jhat * v.y + khat * v.z
+    }
+
+    #[allow(dead_code)]
+    pub fn forward(&self) -> Float3 {
+        self.forward
+    }
+    #[allow(dead_code)]
+    pub fn backward(&self) -> Float3 {
+        Float3::ZERO - self.forward
+    }
+    #[allow(dead_code)]
+    pub fn right(&self) -> Float3 {
+        self.right
+    }
+    #[allow(dead_code)]
+    pub fn left(&self) -> Float3 {
+        Float3::ZERO - self.right
+    }
+    #[allow(dead_code)]
+    pub fn up(&self) -> Float3 {
+        self.up
+    }
+    #[allow(dead_code)]
+    pub fn down(&self) -> Float3 {
+        Float3::ZERO - self.up
     }
 }

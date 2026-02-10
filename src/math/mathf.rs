@@ -74,3 +74,10 @@ pub fn lerp_float3(a: Float3, b: Float3, t: f32) -> Float3 {
 pub fn lerp_float2(a: Float2, b: Float2, t: f32) -> Float2 {
 	a + (b - a) * t.clamp(0.0, 1.0)
 }
+
+
+#[inline(always)]
+#[allow(dead_code)]
+pub fn transform_vector(ihat: Float3, jhat: Float3, khat: Float3, v: Float3) -> Float3 {
+    ihat * v.x + jhat * v.y + khat * v.z
+}

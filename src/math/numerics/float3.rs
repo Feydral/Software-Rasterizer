@@ -18,6 +18,14 @@ impl Float3 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
 
+    pub fn cross(self, rhs: Float3) -> Float3 {
+        Float3 {
+            x: self.y * rhs.z - self.z * rhs.y,
+            y: self.z * rhs.x - self.x * rhs.z,
+            z: self.x * rhs.y - self.y * rhs.x,
+        }
+    }
+
     pub fn length(self) -> f32 {
         self.dot(self).sqrt()
     }

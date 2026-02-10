@@ -6,3 +6,5 @@ The goal of this project is to learn how [rasterization](https://en.wikipedia.or
 Features: CPU rasterization & Real-time display using minifb
 
 *This is a learning project and not intended to be a full-featured renderer.*
+
+Tips for the demo: Control with WASD and use the arrow keys to control pitch and yaw. With shift and space u can go up and down.

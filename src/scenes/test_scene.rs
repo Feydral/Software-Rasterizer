@@ -46,9 +46,7 @@ impl Scene for TestScene {
         let mesh = resource_helper::load_mesh("C:/Users/lianh/Development/rasterizer/src/assets/dragon.obj");
 
         self.create_model("Dragon", Box::new(LitTextureShader::new(Float3::UNIT_Y, color)));
-        let model = self.get_model("Dragon").unwrap();
-        model.mesh = mesh;
-        model.transform.set_position(Float3::new(0.0, -1.5, 0.0));
+        self.get_model("Dragon").unwrap().mesh = mesh;
     }
 
     fn update(&mut self, delta_time: f32, render_target: &mut RenderTarget) {
@@ -63,19 +61,39 @@ impl Scene for TestScene {
 
         let speed = self.speed * delta_time;
     
-        self.get_model("Dragon").unwrap().transform.rotate(Float3::new( 0.0, speed * 0.3, 0.0));
-
         if input::is_pressed(Key::W) {
-            self.cam.transform.translate(Float3::new(0.0, 0.0, speed));
+            self.cam.transform.translate(Float3::new(self.cam.transform.forward().x * speed, 0.0, self.cam.transform.forward().z * speed));
         }
         if input::is_pressed(Key::S) {
-            self.cam.transform.translate(Float3::new(0.0, 0.0, -speed));
+            self.cam.transform.translate(Float3::new(self.cam.transform.backward().x * speed, 0.0, self.cam.transform.backward().z * speed));
         }
         if input::is_pressed(Key::D) {
-            self.cam.transform.translate(Float3::new(speed, 0.0, 0.0));
+            self.cam.transform.translate(Float3::new(self.cam.transform.right().x * speed, 0.0, self.cam.transform.right().z * speed));
         }
         if input::is_pressed(Key::A) {
-            self.cam.transform.translate(Float3::new(-speed, 0.0, 0.0));
+            self.cam.transform.translate(Float3::new(self.cam.transform.left().x * speed, 0.0, self.cam.transform.left().z * speed));
+        }
+
+        if input::is_pressed(Key::LeftShift) {
+            self.cam.transform.translate(Float3::ZERO - Float3::UNIT_Y * speed);
+        }
+        if input::is_pressed(Key::Space) {
+            self.cam.transform.translate(Float3::UNIT_Y * speed);
+        }
+
+        let rotation_speed = self.speed * delta_time * 0.5;
+
+        if input::is_pressed(Key::Left) {
+            self.cam.transform.rotate(Float3::new(0.0, rotation_speed, 0.0)); // Yaw links
+        }
+        if input::is_pressed(Key::Right) {
+            self.cam.transform.rotate(Float3::new(0.0, -rotation_speed, 0.0)); // Yaw rechts
+        }
+        if input::is_pressed(Key::Up) {
+            self.cam.transform.rotate(Float3::new(rotation_speed, 0.0, 0.0)); // Pitch nach oben
+        }
+        if input::is_pressed(Key::Down) {
+            self.cam.transform.rotate(Float3::new(-rotation_speed, 0.0, 0.0)); // Pitch nach unten
         }
 
         render_target.clear(Float4::new(0.53, 0.81, 0.92, 1.0));

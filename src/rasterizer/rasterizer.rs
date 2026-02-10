@@ -145,22 +145,42 @@ pub fn process_model(model: &mut Model, render_target: &RenderTarget, cam: &Came
     }
 }
 
+
 fn add_rasterizer_point(model: &mut Model, render_target: &RenderTarget, cam: &Camera, view: Float3, vertex_idx: usize) {
+    let normal_world = normal_to_normalview(&model.transform, model.mesh.normals[vertex_idx]);
+    let normal_view = normalview_to_screen(cam, normal_world);
+
     model.rasterizer_points.push(RasterizerPoint::new(
         view.z,
         view_to_screen(render_target, cam, view),
         model.mesh.uvs[vertex_idx],
-        model.mesh.normals[vertex_idx],
+        normal_view,
     ));
 }
 
 fn add_rasterizer_point_lerp(model: &mut Model, render_target: &RenderTarget, cam: &Camera, view: Float3, vertex_idx_a: usize, vertex_idx_b: usize, t: f32) {
+    let normal_a_world = normal_to_normalview(&model.transform, model.mesh.normals[vertex_idx_a]);
+    let normal_b_world = normal_to_normalview(&model.transform, model.mesh.normals[vertex_idx_b]);
+
+    let normal_world = f::lerp_float3(normal_a_world, normal_b_world, t).normalize();
+
+    let normal_view = normalview_to_screen(cam, normal_world);
+
     model.rasterizer_points.push(RasterizerPoint::new(
         view.z,
         view_to_screen(render_target, cam, view),
         f::lerp_float2(model.mesh.uvs[vertex_idx_a], model.mesh.uvs[vertex_idx_b], t),
-        f::lerp_float3(model.mesh.normals[vertex_idx_a], model.mesh.normals[vertex_idx_b], t),
+        normal_view,
     ));
+}
+
+fn normalview_to_screen(cam: &Camera, normal_world: Float3) -> Float3 {
+    cam.transform.to_local_vector(normal_world).normalize()
+}
+
+#[inline(always)]
+fn normal_to_normalview(transform: &Transform, normal_local: Float3) -> Float3 {
+    transform.transform_vector_along_self(normal_local)
 }
 
 #[inline(always)]

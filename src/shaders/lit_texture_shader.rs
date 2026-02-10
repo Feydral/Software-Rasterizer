@@ -37,7 +37,6 @@ impl FragmentShader for LitTextureShader {
 
         let mut color = self.texture.get_pixel(x, y);
 
-        // Lichtintensität anwenden (RGB-Kanäle)
         color.x *= light_intensity;
         color.y *= light_intensity;
         color.z *= light_intensity;
