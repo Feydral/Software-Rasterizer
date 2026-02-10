@@ -16,4 +16,4 @@ This is a learning project and is not intended to be a full-featured renderer.
 - **Shift / Space**: move down / up
 
 ## Credits
-Big thanks to **RobGPT / Gangrob** for the help
+Big thanks to **RobGPT/Gangrob** for the help!

@@ -1,18 +1,24 @@
 #![allow(unused_variables)]
+#![allow(unused_imports)]
 
 use minifb::Key;
 
 use crate::core::{input, resource_helper};
+
 use crate::math::numerics::float3::Float3;
 use crate::math::numerics::float4::Float4;
+
 use crate::rasterizer::camera::Camera;
 use crate::rasterizer::rasterizer;
-use crate::shaders::lit_texture_shader::LitTextureShader;
+use crate::rasterizer::render_target::RenderTarget;
+
 use crate::shaders::shader_base::Shader;
 use crate::shaders::texture_shader::TextureShader;
+use crate::shaders::lit_texture_shader::LitTextureShader;
+use crate::shaders::transparent_texture_shader::{self, TransparentTextureShader};
+
 use crate::types::mesh::Mesh;
 use crate::types::model::Model;
-use crate::rasterizer::render_target::RenderTarget;
 use crate::types::scene::Scene;
 
 pub struct TestScene {
@@ -47,13 +53,15 @@ impl Scene for TestScene {
         let dragon_mesh = resource_helper::load_mesh("C:/Users/lianh/Development/rasterizer/src/assets/dragon.obj");
 
         self.create_model("Dragon", Shader::LitTextureShader(LitTextureShader::new(Float3::UNIT_Y, color)));
-        self.get_model("Dragon").unwrap().mesh = dragon_mesh;
-        self.get_model("Dragon").unwrap().transform.set_scale(Float3::new(0.2, 0.2, 0.2));
+        let dragon_model = self.get_model("Dragon").unwrap();
+        dragon_model.mesh = dragon_mesh;
+        dragon_model.transform.set_scale(Float3::new(0.2, 0.2, 0.2));
+        dragon_model.transform.set_position(Float3::new(0.0, 0.05, 0.0));
 
         let floor_texture = resource_helper::load_texture("C:/Users/lianh/Development/rasterizer/src/assets/floortexture.png");
         let floor_mesh = resource_helper::load_mesh("C:/Users/lianh/Development/rasterizer/src/assets/Floor.obj");
 
-        self.create_model("Floor", Shader::TextureShader(TextureShader::new(floor_texture)));
+        self.create_model("Floor", Shader::TransparentTextureShader(TransparentTextureShader::new(floor_texture, 0.8)));
         self.get_model("Floor").unwrap().mesh = floor_mesh;
     }
 
