@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::{math::numerics::{float2::Float2, float3::Float3, float4::Float4}, shaders::traits::fragment_shader::FragmentShader, types::texture::Texture};
+use crate::{math::numerics::{float2::Float2, float3::Float3, float4::Float4}, types::texture::Texture};
 
 #[derive(Clone)]
 pub struct LitTextureShader {
@@ -15,12 +15,10 @@ impl LitTextureShader {
             texture,
         }
     }
-}
 
-impl FragmentShader for LitTextureShader {
     #[inline(always)]
     #[allow(unused_variables)]
-    fn pixel_color(&self, pixel_coord: Float2, uv: Float2, normal: Float3, depth: f32) -> Float4 {
+    pub fn pixel_color(&self, pixel_coord: Float2, uv: Float2, normal: Float3, depth: f32) -> Float4 {
         let normal = normal.normalize();
 
         let mut light_intensity = (Float3::dot(normal, self.direction_to_light) + 1.0) * 0.5;

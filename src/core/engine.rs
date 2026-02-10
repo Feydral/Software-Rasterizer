@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use std::time::Instant;
 use minifb::{Window, WindowOptions};
 
@@ -74,19 +75,27 @@ impl Engine {
         }
     }
 
-    fn render(&mut self, render_target: &RenderTarget) {
-        for y in 0..self.height {
-            for x in 0..self.width {
-                let r = mathf::clamp(render_target.get_pixel_color(x, y).x, 0.0, 1.0) * 255.0;
-                let g = mathf::clamp(render_target.get_pixel_color(x, y).y, 0.0, 1.0) * 255.0;
-                let b = mathf::clamp(render_target.get_pixel_color(x, y).z, 0.0, 1.0) * 255.0;
+    fn render (&mut self, render_target: &RenderTarget) {
+        let width = self.width as usize;
+        let height = self.height as usize;
+        let color_buf = render_target.color_buffer();
 
-                let color = ((r as u32) << 16) | ((g as u32) << 8) | ((b as u32) << 0);
-
-                let flipped_y = self.height - 1 - y;
-                self.framebuffer[(flipped_y * self.width + x) as usize] = color; 
+        let convert_row = |flipped_y, row: &mut [u32]| {
+            let src_y: usize = height - 1 - flipped_y;
+            let src_offset: usize = src_y * width;
+            for x in 0..width {
+                let c = color_buf[src_offset + x];
+                let r: u32 = (c.x.clamp(0.0, 1.0) * 255.0) as u32;
+                let g: u32 = (c.y.clamp(0.0, 1.0) * 255.0) as u32;
+                let b: u32 = (c.z.clamp(0.0, 1.0) * 255.0) as u32;
+                row[x] = (r << 16) | (g << 8) | b;
             }
-        }
+        };
+
+        self.framebuffer
+            .par_chunks_mut(width)
+            .enumerate()
+            .for_each(|(y, row)| convert_row(y, row));
     }
 
     fn resize<T: Scene>(&mut self, scene: &mut T, render_target: &mut RenderTarget) {

@@ -8,8 +8,8 @@ use crate::math::numerics::float4::Float4;
 use crate::rasterizer::camera::Camera;
 use crate::rasterizer::rasterizer;
 use crate::shaders::lit_texture_shader::LitTextureShader;
+use crate::shaders::shader_base::Shader;
 use crate::shaders::texture_shader::TextureShader;
-use crate::shaders::traits::fragment_shader::FragmentShader;
 use crate::types::mesh::Mesh;
 use crate::types::model::Model;
 use crate::rasterizer::render_target::RenderTarget;
@@ -36,7 +36,7 @@ impl TestScene {
         self.models.iter_mut().find(|model| model.name == name)
     }
 
-    fn create_model(&mut self, name: &str, shader: Box<dyn FragmentShader>) {
+    fn create_model(&mut self, name: &str, shader: Shader) {
         self.models.push(Model::new(name, Mesh::empty(), shader));
     }
 }
@@ -46,19 +46,19 @@ impl Scene for TestScene {
         let color = resource_helper::load_texture("C:/Users/lianh/Development/rasterizer/src/assets/color.png");
         let dragon_mesh = resource_helper::load_mesh("C:/Users/lianh/Development/rasterizer/src/assets/dragon.obj");
 
-        self.create_model("Dragon", Box::new(LitTextureShader::new(Float3::UNIT_Y, color)));
+        self.create_model("Dragon", Shader::LitTextureShader(LitTextureShader::new(Float3::UNIT_Y, color)));
         self.get_model("Dragon").unwrap().mesh = dragon_mesh;
         self.get_model("Dragon").unwrap().transform.set_scale(Float3::new(0.2, 0.2, 0.2));
 
         let floor_texture = resource_helper::load_texture("C:/Users/lianh/Development/rasterizer/src/assets/floortexture.png");
         let floor_mesh = resource_helper::load_mesh("C:/Users/lianh/Development/rasterizer/src/assets/Floor.obj");
 
-        self.create_model("Floor", Box::new(TextureShader::new(floor_texture)));
+        self.create_model("Floor", Shader::TextureShader(TextureShader::new(floor_texture)));
         self.get_model("Floor").unwrap().mesh = floor_mesh;
     }
 
     fn update(&mut self, delta_time: f32, render_target: &mut RenderTarget) {
-        println!("Fps: {}", 1.0 / delta_time);
+        println!("Resolution: {}x{}, Fps: {}", render_target.width(), render_target.height(), 1.0 / delta_time);
 
         if input::is_pressed(Key::R) {
             self.speed += 0.3;

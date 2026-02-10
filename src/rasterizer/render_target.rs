@@ -63,6 +63,10 @@ impl RenderTarget {
         self.depth_buffer[index]
     }
 
+    pub fn color_buffer(&self) -> &[Float4] {
+        self.color_buffer.as_slice()
+    }
+
 
     pub fn width(&self) -> u32 {
         self.width

@@ -27,7 +27,7 @@ pub fn min(a: i32, b: i32) -> i32 {
 
 #[inline]
 pub fn max(a: i32, b: i32) -> i32 {
-    a.min(b)
+    a.max(b)
 }
 
 #[inline]
