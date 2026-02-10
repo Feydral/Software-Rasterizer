@@ -41,7 +41,7 @@ impl Engine {
         }
     }
 
-    pub fn run<T: Scene>(&mut self, scene: &mut T) {
+    pub fn run<S: Scene>(&mut self, scene: &mut S) {
         let mut render_target = RenderTarget::new(Self::START_WIDTH, Self::START_HEIGHT);
 
         scene.start(&mut render_target);

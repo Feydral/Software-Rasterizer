@@ -29,10 +29,29 @@ impl RenderTarget {
     }
 
     pub fn set_pixel(&mut self, x: u32, y: u32, color: Float4, depth: f32) {
+        if color.w < f32::EPSILON {
+            return;
+        }
+
         let index = mathi::xy_to_index(x, y, self.width, self.height) as usize;
-        self.color_buffer[index] = color;
+        
+        let dst = self.color_buffer[index];
+        let src = color;
+    
+        let alpha = src.w.clamp(0.0, 1.0);
+        let inv_alpha = 1.0 - alpha;
+    
+        let out = Float4 {
+            x: src.x * alpha + dst.x * inv_alpha,
+            y: src.y * alpha + dst.y * inv_alpha,
+            z: src.z * alpha + dst.z * inv_alpha,
+            w: alpha + dst.w * inv_alpha,
+        };
+    
+        self.color_buffer[index] = out;
         self.depth_buffer[index] = depth;
     }
+
 
     pub fn get_pixel_color(&self, x: u32, y: u32) -> Float4 {
         let index = mathi::xy_to_index(x, y, self.width, self.height) as usize;
