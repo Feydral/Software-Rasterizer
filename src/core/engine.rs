@@ -26,11 +26,7 @@ impl Engine {
                 resize: true,
                 scale: minifb::Scale::X1,
                 scale_mode: minifb::ScaleMode::Stretch,
-                borderless: true,
-                title: true,
-                transparency: false,
-                topmost: false,
-                none: false,
+                ..WindowOptions::default()
             },
         )
         .expect("Failed to create window");
