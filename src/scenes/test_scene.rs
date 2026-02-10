@@ -49,8 +49,8 @@ impl TestScene {
 
 impl Scene for TestScene {
     fn start(&mut self, render_target: &mut RenderTarget) {
-        let color = resource_helper::load_texture("../rasterizer/src/assets/color.png");
-        let dragon_mesh = resource_helper::load_mesh("../rasterizer/src/assets/dragon.obj");
+        let color = resource_helper::load_texture("color.png");
+        let dragon_mesh = resource_helper::load_mesh("dragon.obj");
 
         self.create_model("Dragon", Shader::LitTextureShader(LitTextureShader::new(Float3::UNIT_Y, color)));
         let dragon_model = self.get_model("Dragon").unwrap();
@@ -58,8 +58,8 @@ impl Scene for TestScene {
         dragon_model.transform.set_scale(Float3::new(0.2, 0.2, 0.2));
         dragon_model.transform.set_position(Float3::new(0.0, 0.05, 0.0));
 
-        let floor_texture = resource_helper::load_texture("../rasterizer/src/assets/floortexture.png");
-        let floor_mesh = resource_helper::load_mesh("../rasterizer/src/assets/Floor.obj");
+        let floor_texture = resource_helper::load_texture("floortexture.png");
+        let floor_mesh = resource_helper::load_mesh("Floor.obj");
 
         self.create_model("Floor", Shader::TransparentTextureShader(TransparentTextureShader::new(floor_texture, 0.8)));
         self.get_model("Floor").unwrap().mesh = floor_mesh;
