@@ -20,20 +20,24 @@ impl LitTextureShader {
     #[allow(unused_variables)]
     pub fn pixel_color(&self, pixel_coord: Float2, uv: Float2, normal: Float3, depth: f32) -> Float4 {
         let normal = normal.normalize();
+        let mut light_intensity =
+            (Float3::dot(normal, self.direction_to_light.normalize()) + 1.0) * 0.5;
 
-        let mut light_intensity = (Float3::dot(normal, self.direction_to_light) + 1.0) * 0.5;
         light_intensity = 0.4 + (1.0 - 0.4) * light_intensity;
 
-        let u_frac = uv.x - uv.x.floor();
-        let v_frac = uv.y - uv.y.floor();
+        let u = uv.x.rem_euclid(1.0);
+        let v = uv.y.rem_euclid(1.0);
 
-        let wscale = self.texture.width().saturating_sub(1);
-        let hscale = self.texture.height().saturating_sub(1);
+        let width = self.texture.width() as f32;
+        let height = self.texture.height() as f32;
 
-        let x = (u_frac * wscale as f32) as u32;
-        let y = (v_frac * hscale as f32) as u32;
+        let mut x = (u * width).floor() as i32;
+        let mut y = (v * height).floor() as i32;
 
-        let mut color = self.texture.get_pixel(x, y);
+        x = x.clamp(0, self.texture.width() as i32 - 1);
+        y = y.clamp(0, self.texture.height() as i32 - 1);
+
+        let mut color = self.texture.get_pixel(x as u32, y as u32);
 
         color.x *= light_intensity;
         color.y *= light_intensity;

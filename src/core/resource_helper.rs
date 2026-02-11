@@ -1,30 +1,13 @@
-use std::{env, fs, path::{Path, PathBuf}};
+use std::{fs, path::Path};
 
 use crate::{math::numerics::{float2::Float2, float3::Float3, float4::Float4}, types::{mesh::Mesh, texture::Texture}};
 
-fn asset_path(file_name: &str) -> PathBuf {
-    if let Ok(mut exe_path) = env::current_exe() {
-        exe_path.pop(); // Ordner der exe
-        exe_path.push("assets");
-        exe_path.push(file_name);
-        if exe_path.exists() {
-            return exe_path;
-        }
-    }
-
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("src/assets")
-        .join(file_name)
-}
-
-pub fn load_mesh(file_name: &str) -> Mesh {
-    let path = asset_path(file_name);
+pub fn load_mesh(path: &str) -> Mesh {
     let obj_string = fs::read_to_string(&path).expect("Failed to read obj file");
     load_obj(&obj_string)
 }
 
-pub fn load_texture(file_name: &str) -> Texture {
-    let path = asset_path(file_name);
+pub fn load_texture(path: &str) -> Texture {
     load_texture_png(&path)
 }
 
