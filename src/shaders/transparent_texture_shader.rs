@@ -4,8 +4,8 @@ use crate::{math::numerics::{float2::Float2, float3::Float3, float4::Float4}, ty
 
 #[derive(Clone)]
 pub struct TransparentTextureShader {
-    pub texture: Texture,
-    pub alpha: f32,
+    texture: Texture,
+    alpha: f32,
 }
 
 impl TransparentTextureShader {

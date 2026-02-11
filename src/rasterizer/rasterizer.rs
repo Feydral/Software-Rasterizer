@@ -1,4 +1,4 @@
-use crate::{math::numerics::{float2::Float2, float3::Float3}, rasterizer::{camera::Camera, rasterizer_point::RasterizerPoint, render_target::RenderTarget}, types::{model::Model, transform::Transform}};
+use crate::{math::numerics::{float2::Float2, float3::Float3, float4::Float4}, rasterizer::{camera::Camera, rasterizer_point::RasterizerPoint, render_target::RenderTarget}, types::{model::Model, transform::Transform}};
 use crate::math::mathf as f;
 use crate::math::mathi as i;
 
@@ -13,17 +13,23 @@ pub fn render(render_target: &mut RenderTarget, models: &mut Vec<Model>, cam: &C
             let r1 = &model.rasterizer_points[i + 1];
             let r2 = &model.rasterizer_points[i + 2];
 
+            if model.shader.wire_frame() {
+                let line_color = Float4::new(1.0, 1.0, 1.0, 1.0);
+                draw_line(render_target, r0, r1, line_color);
+                draw_line(render_target, r1, r2, line_color);
+                draw_line(render_target, r2, r0, line_color);
+                continue;
+            }
+
             let a = r0.screen_pos;
             let b = r1.screen_pos;
             let c = r2.screen_pos;
 
-            // Triangle bounds
             let min_x = f::min(a.x, f::min(b.x, c.x));
             let min_y = f::min(a.y, f::min(b.y, c.y));
             let max_x = f::max(a.x, f::max(b.x, c.x));
             let max_y = f::max(a.y, f::max(b.y, c.y));
 
-            // Pixel block covering the triangle bounds
             let block_start_x = i::clamp(f::floor_to_int(min_x), 0, (render_target.width() - 1) as i32);
             let block_start_y = i::clamp(f::floor_to_int(min_y), 0, (render_target.height() - 1) as i32);
             let block_end_x = i::clamp(f::ceil_to_int(max_x), 0, (render_target.width() - 1) as i32);
@@ -37,17 +43,15 @@ pub fn render(render_target: &mut RenderTarget, models: &mut Vec<Model>, cam: &C
             let ny = r1.normals * inv_depths.y;
             let nz = r2.normals * inv_depths.z;
 
-            // Loop over the block of pixels covering the triangle bounds
             for y in block_start_y..=block_end_y {
                 for x in block_start_x..=block_end_x {
-                    let p = Float2::new(x as f32, y as f32);
+                    let p = Float2::new(x as f32 + 0.5, y as f32 + 0.5);
                     let mut weight_a = 0.0;
                     let mut weight_b = 0.0;
                     let mut weight_c = 0.0;
 
                     if f::point_in_triangle(a, b, c, p, &mut weight_a, &mut weight_b, &mut weight_c) {
-                        let depth =
-                            1.0 / (inv_depths.x * weight_a + inv_depths.y * weight_b + inv_depths.z * weight_c);
+                        let depth = 1.0 / (inv_depths.x * weight_a + inv_depths.y * weight_b + inv_depths.z * weight_c);
 
                         if depth >= render_target.get_pixel_depth(x as u32, y as u32) {
                             continue;
@@ -55,6 +59,7 @@ pub fn render(render_target: &mut RenderTarget, models: &mut Vec<Model>, cam: &C
 
                         let uv = (tx * weight_a + ty * weight_b + tz * weight_c) * depth;
                         let normal = (nx * weight_a + ny * weight_b + nz * weight_c) * depth;
+
                         let color = model.shader.pixel_color(p, uv, normal, depth);
 
                         render_target.set_pixel(x as u32, y as u32, color, depth);
@@ -145,7 +150,6 @@ pub fn process_model(model: &mut Model, render_target: &RenderTarget, cam: &Came
     }
 }
 
-
 fn add_rasterizer_point(model: &mut Model, render_target: &RenderTarget, cam: &Camera, view: Float3, vertex_idx: usize) {
     let normal_world = normal_to_normalview(&model.transform, model.mesh.normals[vertex_idx]);
     let normal_view = normalview_to_screen(cam, normal_world);
@@ -196,4 +200,65 @@ fn view_to_screen(render_target: &RenderTarget, cam: &Camera, view: Float3) -> F
 
     let pixel_offset = Float2::new(view.x, view.y) * pixels_per_world_unit;
     Float2::new(render_target.width() as f32, render_target.height() as f32) / 2.0 + pixel_offset
+}
+
+fn draw_line(render_target: &mut RenderTarget, start: &RasterizerPoint, end: &RasterizerPoint, color: Float4) {
+    let x0 = start.screen_pos.x.round() as i32;
+    let y0 = start.screen_pos.y.round() as i32;
+    let x1 = end.screen_pos.x.round() as i32;
+    let y1 = end.screen_pos.y.round() as i32;
+
+    let z0 = start.depth;
+    let z1 = end.depth;
+
+    let dx = (x1 - x0).abs();
+    let dy = (y1 - y0).abs();
+
+    let steps = if dx > dy { dx } else { dy };
+    let steps = if steps == 0 { 1 } else { steps } as i32;
+
+    let sx = if x0 < x1 { 1 } else { -1 };
+    let sy = if y0 < y1 { 1 } else { -1 };
+
+    let mut err = dx - dy;
+    let mut x = x0;
+    let mut y = y0;
+
+    let max_iters = (dx + dy + 1000) as usize;
+    let mut iter_count: usize = 0;
+    let mut step: i32 = 0;
+
+    loop {
+        iter_count += 1;
+        if iter_count > max_iters {
+            break;
+        }
+
+        if x >= 0 && y >= 0 && (x as u32) < render_target.width() && (y as u32) < render_target.height() {
+            let t = (step as f32) / (steps as f32);
+            let depth = z0 * (1.0 - t) + z1 * t;
+
+            let ux = x as u32;
+            let uy = y as u32;
+            if depth < render_target.get_pixel_depth(ux, uy) {
+                render_target.set_pixel(ux, uy, color, depth);
+            }
+        }
+
+        if x == x1 && y == y1 {
+            break;
+        }
+
+        let e2 = 2 * err;
+        if e2 > -dy {
+            err -= dy;
+            x += sx;
+        }
+        if e2 < dx {
+            err += dx;
+            y += sy;
+        }
+
+        step = step.saturating_add(1);
+    }
 }

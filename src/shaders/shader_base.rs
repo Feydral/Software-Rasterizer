@@ -16,4 +16,13 @@ impl Shader {
             Shader::TransparentTextureShader(s) => s.pixel_color(pixel_coord, uv, normal, depth),
         }
     }
+
+    #[inline(always)]
+    pub fn wire_frame(&self) -> bool {
+        match self {
+            Shader::TextureShader(s) => s.wire_frame(),
+            Shader::LitTextureShader(s) => s.wire_frame(),
+            Shader::TransparentTextureShader(_) => false,
+        }
+    }
 }

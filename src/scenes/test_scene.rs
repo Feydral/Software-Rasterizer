@@ -61,7 +61,7 @@ impl Scene for TestScene {
         #[cfg(not(feature = "release_paths"))]
         let dragon_mesh = resource_helper::load_mesh("../rasterizer/src/assets/dragon.obj");
 
-        let dragon_model = self.create_model("Dragon", Shader::LitTextureShader(LitTextureShader::new(Float3::UNIT_Y, color)));
+        let dragon_model = self.create_model("Dragon", Shader::LitTextureShader(LitTextureShader::new(Float3::UNIT_Y, color, true)));
         dragon_model.mesh = dragon_mesh;
         dragon_model.transform.set_scale(Float3::new(0.2, 0.2, 0.2));
         dragon_model.transform.set_position(Float3::new(0.0, 0.05, 0.0));
@@ -76,7 +76,7 @@ impl Scene for TestScene {
         #[cfg(not(feature = "release_paths"))]
         let floor_mesh = resource_helper::load_mesh("../rasterizer/src/assets/Floor.obj");
 
-        let floor_model = self.create_model("Floor", Shader::TextureShader(TextureShader::new(floor_texture)));
+        let floor_model = self.create_model("Floor", Shader::TextureShader(TextureShader::new(floor_texture, true)));
         floor_model.mesh = floor_mesh;
 
         #[cfg(feature = "release_paths")]
@@ -89,7 +89,7 @@ impl Scene for TestScene {
         #[cfg(not(feature = "release_paths"))]
         let sw_mesh = resource_helper::load_mesh("../rasterizer/src/assets/SmallWorld.obj");
 
-        let sw_model = self.create_model("SmallWorld", Shader::LitTextureShader(LitTextureShader::new(Float3::new(0.5, 1.0, 0.3), sw_texture)));
+        let sw_model = self.create_model("SmallWorld", Shader::LitTextureShader(LitTextureShader::new(Float3::new(0.5, 1.0, 0.3), sw_texture, true)));
         sw_model.mesh = sw_mesh;
         sw_model.transform.set_position(Float3::new(1.0, 0.01, 0.0));
         sw_model.transform.set_scale(Float3::new(0.2, 0.2, 0.2));
@@ -144,7 +144,8 @@ impl Scene for TestScene {
             self.cam.transform.rotate(Float3::new(-rotation_speed, 0.0, 0.0));
         }
 
-        render_target.clear(Float4::new(0.53, 0.81, 0.92, 1.0));
+        // render_target.clear(Float4::new(0.53, 0.81, 0.92, 1.0));
+        render_target.clear(Float4::ZERO);
         rasterizer::render(render_target, &mut self.models, &self.cam);
     }
 
