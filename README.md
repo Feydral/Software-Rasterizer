@@ -6,6 +6,7 @@ The goal of this project is to learn how [rasterization](https://en.wikipedia.or
 ## Features
 - CPU-based rasterization
 - Real-time display using minifb
+- Resource helper to load any 3D Model you want
 
 ## Notes
 This is a learning project and is not intended to be a full-featured renderer.
@@ -14,6 +15,7 @@ This is a learning project and is not intended to be a full-featured renderer.
 - **WASD**: move
 - **Arrow keys**: look around
 - **Shift / Space**: move down / up
+- **R / F**: speed control
 
 ## Credits
 Big thanks to **RobGPT/Gangrob** for the help!
