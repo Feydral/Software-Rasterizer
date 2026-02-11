@@ -52,9 +52,9 @@ impl TestScene {
 impl Scene for TestScene {
     fn start(&mut self, render_target: &mut RenderTarget) {
         #[cfg(feature = "release_paths")]
-        let color = resource_helper::load_texture("../assets/color.png");
+        let color = resource_helper::load_texture("assets/color.png");
         #[cfg(feature = "release_paths")]
-        let dragon_mesh = resource_helper::load_mesh("../assets/dragon.obj");
+        let dragon_mesh = resource_helper::load_mesh("assets/dragon.obj");
 
         #[cfg(not(feature = "release_paths"))]
         let color = resource_helper::load_texture("../rasterizer/src/assets/color.png");
@@ -67,9 +67,9 @@ impl Scene for TestScene {
         dragon_model.transform.set_position(Float3::new(0.0, 0.05, 0.0));
 
         #[cfg(feature = "release_paths")]
-        let floor_texture = resource_helper::load_texture("../assets/floortexture.png");
+        let floor_texture = resource_helper::load_texture("assets/floortexture.png");
         #[cfg(feature = "release_paths")]
-        let floor_mesh = resource_helper::load_mesh("../assets/Floor.obj");
+        let floor_mesh = resource_helper::load_mesh("assets/Floor.obj");
 
         #[cfg(not(feature = "release_paths"))]
         let floor_texture = resource_helper::load_texture("../rasterizer/src/assets/floortexture.png");
@@ -80,9 +80,9 @@ impl Scene for TestScene {
         floor_model.mesh = floor_mesh;
 
         #[cfg(feature = "release_paths")]
-        let sw_texture = resource_helper::load_texture("../assets/Smallworldtexture.png");
+        let sw_texture = resource_helper::load_texture("assets/Smallworldtexture.png");
         #[cfg(feature = "release_paths")]
-        let sw_mesh = resource_helper::load_mesh("../assets/SmallWorld.obj");
+        let sw_mesh = resource_helper::load_mesh("assets/SmallWorld.obj");
 
         #[cfg(not(feature = "release_paths"))]
         let sw_texture = resource_helper::load_texture("../rasterizer/src/assets/Smallworldtexture.png");
