@@ -16,6 +16,7 @@ This is a learning project and is not intended to be a full-featured renderer.
 - **Arrow keys**: look around
 - **Shift / Space**: move down / up
 - **R / F**: speed control
+- **C**: toggle wire-frame renderer
 
 ## Credits
 Big thanks to **RobGPT/Gangrob** for the help!
