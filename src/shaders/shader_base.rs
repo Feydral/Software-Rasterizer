@@ -18,10 +18,10 @@ impl Shader {
     }
 
     #[inline(always)]
-    pub fn wire_frame(&self) -> bool {
+    pub fn render_as_wireframe(&self) -> bool {
         match self {
-            Shader::TextureShader(s) => s.wire_frame(),
-            Shader::LitTextureShader(s) => s.wire_frame(),
+            Shader::TextureShader(s) => s.wireframe,
+            Shader::LitTextureShader(s) => s.wireframe,
             Shader::TransparentTextureShader(_) => false,
         }
     }

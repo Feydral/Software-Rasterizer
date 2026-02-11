@@ -100,6 +100,16 @@ impl Scene for TestScene {
     fn update(&mut self, delta_time: f32, render_target: &mut RenderTarget) {
         println!("Resolution: {}x{}, Fps: {}", render_target.width(), render_target.height(), 1.0 / delta_time);
 
+        if input::is_down(Key::C) {
+            for model in self.models.iter_mut() {
+                match &mut model.shader {
+                    Shader::TextureShader(s) => s.wireframe = !s.wireframe,
+                    Shader::LitTextureShader(s) => s.wireframe = !s.wireframe,
+                    Shader::TransparentTextureShader(_) => {},
+                }
+            }
+        }
+
         if input::is_pressed(Key::R) {
             self.speed += 0.04;
         }

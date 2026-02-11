@@ -13,7 +13,7 @@ pub fn render(render_target: &mut RenderTarget, models: &mut Vec<Model>, cam: &C
             let r1 = &model.rasterizer_points[i + 1];
             let r2 = &model.rasterizer_points[i + 2];
 
-            if model.shader.wire_frame() {
+            if model.shader.render_as_wireframe() {
                 let line_color = Float4::new(1.0, 1.0, 1.0, 1.0);
                 draw_line(render_target, r0, r1, line_color);
                 draw_line(render_target, r1, r2, line_color);

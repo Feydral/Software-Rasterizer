@@ -4,13 +4,16 @@ use crate::{math::numerics::{float2::Float2, float3::Float3, float4::Float4}, ty
 
 #[derive(Clone)]
 pub struct TextureShader {
-    texture: Texture,
-    wire_frame: bool,
+    pub texture: Texture,
+    pub wireframe: bool,
 }
 
 impl TextureShader {
-    pub fn new(texture: Texture, wire_frame: bool) -> Self {
-        Self { texture, wire_frame }
+    pub fn new(texture: Texture, wireframe: bool) -> Self {
+        Self { 
+            texture, 
+            wireframe,
+        }
     }
 
     #[inline(always)]
@@ -24,9 +27,5 @@ impl TextureShader {
         let x = (u_frac * wscale as f32) as u32;
         let y = (v_frac * hscale as f32) as u32;
         self.texture.get_pixel(x, y)
-    }
-
-    pub fn wire_frame(&self) -> bool {
-        self.wire_frame
     }
 }

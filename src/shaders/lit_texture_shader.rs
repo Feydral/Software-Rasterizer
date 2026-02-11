@@ -4,17 +4,17 @@ use crate::{math::numerics::{float2::Float2, float3::Float3, float4::Float4}, ty
 
 #[derive(Clone)]
 pub struct LitTextureShader {
-    direction_to_light: Float3,
-    texture: Texture,
-    wire_frame: bool,
+    pub direction_to_light: Float3,
+    pub texture: Texture,
+    pub wireframe: bool,
 }
 
 impl LitTextureShader {
-    pub fn new(direction_to_light: Float3, texture: Texture, wire_frame: bool) -> Self {
+    pub fn new(direction_to_light: Float3, texture: Texture, wireframe: bool) -> Self {
         Self {
             direction_to_light,
             texture,
-            wire_frame,
+            wireframe,
         }
     }
 
@@ -46,11 +46,5 @@ impl LitTextureShader {
         color.z *= light_intensity;
 
         color
-    }
-
-    
-    #[inline(always)]
-    pub fn wire_frame(&self) -> bool {
-        self.wire_frame
     }
 }
