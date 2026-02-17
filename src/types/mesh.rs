@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use crate::math::numerics::{float2::Float2, float3::Float3};
 
 #[derive(Clone)]

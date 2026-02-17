@@ -10,9 +10,9 @@ pub struct Texture {
 impl Texture {
     pub fn new(image: Vec<Vec<Float4>>) -> Self {
         Texture {
-            image: image.clone().into_iter().flatten().collect(),
             width: image.len() as u32,
             height: image[0].len() as u32,
+            image: image.into_iter().flatten().collect(),
         }
     }
 

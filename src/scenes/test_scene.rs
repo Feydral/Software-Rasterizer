@@ -16,7 +16,6 @@ use crate::rasterizer::render_target::RenderTarget;
 use crate::shaders::shader_base::Shader;
 use crate::shaders::texture_shader::TextureShader;
 use crate::shaders::lit_texture_shader::LitTextureShader;
-use crate::shaders::transparent_texture_shader::TransparentTextureShader;
 
 use crate::types::mesh::Mesh;
 use crate::types::model::Model;
@@ -105,7 +104,6 @@ impl Scene for TestScene {
                 match &mut model.shader {
                     Shader::TextureShader(s) => s.wireframe = !s.wireframe,
                     Shader::LitTextureShader(s) => s.wireframe = !s.wireframe,
-                    Shader::TransparentTextureShader(_) => {},
                 }
             }
         }
