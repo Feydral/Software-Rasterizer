@@ -19,4 +19,4 @@ This is a learning project and is not intended to be a full-featured renderer.
 - **C**: toggle wire-frame renderer
 
 ## Credits
-Big thanks to **RobGPT/Gangrob** for the help!
+Thanks to **RobGPT/Gangrob** for the help!
